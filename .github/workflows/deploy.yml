@@ -1,3 +1,4 @@
+# This workflow is disabled for now
 name: Build and Deploy Docker Compose
 
 on:
@@ -36,7 +37,7 @@ jobs:
       - name: Deploy Docker Compose stack
         uses: appleboy/ssh-action@v1
         with:
-          hostname: your-remote-server.com
+          host: your-remote-server.com
           username: your-username
           password: ${{ secrets.SERVER_PASSWORD }}
           port: 22

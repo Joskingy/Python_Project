@@ -7,7 +7,7 @@ python:3.9-slim (Flask app)
 postgres:15 (Database)
 docker-compose.yml:
 
-Steps:
+Steps:s
 
 Create a webapp directory with a Dockerfile for your Flask app.
 Run docker-compose up to build and start the containers.
