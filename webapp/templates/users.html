@@ -1,54 +1,27 @@
-<!-- users.html -->
 {% extends "base.html" %}
+{% block title %}Directory{% endblock %}
 {% block content %}
-<div class="container mt-5">
-    <h1 class="mb-4">User List</h1>       
-    <!-- Success/Error Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    <div class="table-responsive">
-        <table class="user-table table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Actions</th>
+<div class="breadcrumb"><span>Workspace</span><span aria-hidden="true">/</span><span>People</span></div>
+<header class="page-heading directory-heading"><div><p class="eyebrow">YOUR PEOPLE, TOGETHER</p><h1>A space for<br>every connection.</h1><p class="page-description">The people you know. The details that matter.</p></div><a class="button button-primary" href="{{ url_for('index') }}"><span aria-hidden="true">+</span> Add a person</a></header>
+<section class="panel directory-panel" aria-labelledby="directory-title">
+    <div class="directory-toolbar"><div class="directory-title"><h2 id="directory-title">People directory</h2><span class="count-badge">{{ users|length }}</span></div><div class="search-field" id="directory-search" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><label class="visually-hidden" for="people-search">Search by name or email</label><input type="search" id="people-search" placeholder="Search name or email…" autocomplete="off"></div></div>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="People directory table">
+        <table class="people-table">
+            <thead><tr><th scope="col">Name</th><th scope="col">Email address</th><th scope="col">Person ID</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+            <tbody>
+                {% for user in users %}
+                <tr data-person-row>
+                    <td><div class="person-name"><span class="avatar avatar-{{ loop.index0 % 4 }}" aria-hidden="true">{{ user[1][:1]|upper }}</span><span data-person-name>{{ user[1] }}</span></div></td>
+                    <td class="email-cell" data-person-email>{{ user[2] }}</td><td><span class="person-id">#{{ '%04d'|format(user[0]) }}</span></td>
+                    <td class="action-cell"><a class="edit-link" href="{{ url_for('edit_user', user_id=user[0]) }}" aria-label="Edit {{ user[1] }}">Edit <span aria-hidden="true">↗</span></a></td>
                 </tr>
-            </thead>
-            <tbody>                    
-                {% if users %}
-                    {% for user in users %}
-                        <tr>
-                            <td>{{ user[0] }}</td>
-                            <td>{{ user[1] }}</td>
-                            <td>{{ user[2] }}</td>
-                            <td>
-                                <!-- Edit Link -->
-                                <a href="{{ url_for('edit_user', user_id=user[0]) }}" class="btn btn-sm btn-primary">
-                                    Edit
-                                </a>
-                            </td>                                
-                        </tr>
-                    {% endfor %}
                 {% else %}
-                    <tr>
-                        <td colspan="3" class="text-center">No users found</td>
-                    </tr>
-                {% endif %}
+                <tr><td colspan="4"><div class="empty-state"><span class="empty-symbol" aria-hidden="true">✳</span><h3>Your directory starts with one person.</h3><p>Add your first connection to bring this space to life.</p><a class="button button-primary" href="{{ url_for('index') }}">Add your first person <span aria-hidden="true">↗</span></a></div></td></tr>
+                {% endfor %}
+                <tr id="no-search-results" hidden><td colspan="4"><div class="empty-state"><h3>No matching people.</h3><p>Try a different name or email address.</p><button class="button button-secondary" type="button" id="clear-search">Clear search</button></div></td></tr>
             </tbody>
         </table>
     </div>
-    <div class="text-center mt-4">
-        <a href="/" class="btn btn-primary">Back to Create User</a>
-    </div>
-</div>
+    <div class="directory-footer"><span id="directory-results" role="status" aria-live="polite">{{ users|length }} {{ 'person' if users|length == 1 else 'people' }} in your directory</span><span class="directory-footnote">A little more connected.</span></div>
+</section>
 {% endblock %}
