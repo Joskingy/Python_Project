@@ -15,6 +15,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,18 +36,16 @@ jobs:
 
       - name: Set image name
         id: image
-        shell: bash
         run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - name: Check deployment failure handling
-        shell: bash
         run: bash tests/deploy.sh
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
       - name: Log in to GitHub Container Registry
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
@@ -55,9 +57,8 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./webapp
-          file: ./webapp/Dockerfile
           platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
@@ -74,7 +75,6 @@ jobs:
     environment: production
     concurrency:
       group: production-deploy
-      cancel-in-progress: false
     env:
       APP_IMAGE: ${{ needs.build.outputs.image }}
       SERVER_HOST: ${{ vars.SERVER_HOST }}
@@ -87,11 +87,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Configure SSH and validate settings
+      - name: Deploy over SSH
         env:
           SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
           SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
-        shell: bash
         run: |
           set -euo pipefail
           : "${SERVER_HOST:?Set production variable SERVER_HOST}"
@@ -101,25 +100,19 @@ jobs:
           : "${SERVER_KNOWN_HOSTS:?Set production secret SERVER_KNOWN_HOSTS}"
           [[ "$SERVER_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
           [[ "$SERVER_USER" =~ ^[a-zA-Z_][a-zA-Z0-9_-]*$ ]]
-          [[ "$SERVER_PORT" =~ ^[0-9]+$ ]] && (( SERVER_PORT >= 1 && SERVER_PORT <= 65535 ))
+          if ! [[ "$SERVER_PORT" =~ ^[1-9][0-9]{0,4}$ ]] || (( SERVER_PORT > 65535 )); then
+            echo 'SERVER_PORT must be an integer between 1 and 65535.' >&2
+            exit 1
+          fi
           [[ "$SERVER_PATH" =~ ^(/[a-zA-Z0-9_-]+)+$ ]]
-          install -m 700 -d "$HOME/.ssh"
-          printf '%s\n' "$SERVER_SSH_KEY" > "$HOME/.ssh/deploy_key"
-          printf '%s\n' "$SERVER_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          chmod 600 "$HOME/.ssh/deploy_key" "$HOME/.ssh/known_hosts"
-
-      - name: Transfer deployment files and update the app
-        shell: bash
-        run: |
-          set -euo pipefail
+          umask 077
+          trap 'rm -f -- "$RUNNER_TEMP/deploy_key" "$RUNNER_TEMP/deploy_known_hosts"' EXIT
+          printf '%s\n' "$SERVER_SSH_KEY" > "$RUNNER_TEMP/deploy_key"
+          printf '%s\n' "$SERVER_KNOWN_HOSTS" > "$RUNNER_TEMP/deploy_known_hosts"
           printf -v remote_command 'mkdir -p -- %q && tar -xf - -C %q && cd -- %q && bash scripts/deploy.sh %q' \
             "$SERVER_PATH" "$SERVER_PATH" "$SERVER_PATH" "$APP_IMAGE"
           tar -cf - docker-compose.production.yml db/init.sql scripts/deploy.sh | \
-            ssh -i "$HOME/.ssh/deploy_key" -p "$SERVER_PORT" \
+            ssh -i "$RUNNER_TEMP/deploy_key" -p "$SERVER_PORT" \
+              -o "UserKnownHostsFile=$RUNNER_TEMP/deploy_known_hosts" \
               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
               -o ConnectTimeout=15 "$SERVER_USER@$SERVER_HOST" "$remote_command"
-
-      - name: Remove temporary SSH key
-        if: always()
-        shell: bash
-        run: rm -f -- "$HOME/.ssh/deploy_key"

@@ -1,13 +1,14 @@
 # Build and deploy
 
-The workflow builds pull requests targeting `main` without publishing. Pushes to
-`main` and manual runs publish `ghcr.io/<lowercase-owner>/<lowercase-repository>`
+The workflow builds pull requests targeting `main` without publishing. Pushes and
+manual runs on `main` publish `ghcr.io/<lowercase-owner>/<lowercase-repository>`
 with the tag `sha-<commit>`. GitHub's automatic `GITHUB_TOKEN` logs in to GHCR;
 registry passwords are never passed to Docker builds.
 
 Production deployment is a manual workflow run on `main` with **deploy** checked.
 It pulls the exact image digest produced by that run. It does not provision a
 server or deploy on every push. Commit and push changes before GitHub can run them.
+Manual runs on other branches build and test only; they cannot publish or deploy.
 
 ## Server setup (once)
 
