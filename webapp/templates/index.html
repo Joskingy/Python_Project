@@ -1,33 +1,20 @@
-<!-- index.html -->
 {% extends "base.html" %}
+{% block title %}Add a person{% endblock %}
 {% block content %}
-<div class="container mt-5">
-    <h1 class="mb-4">Create a New User</h1>
-    
-    <!-- Success/Error Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    <form action="/create" method="post" novalidate>
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" name="name" required>
-        </div>
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-    <div class="mt-4 text-center">
-        <a href="/users" class="btn btn-primary">View All Users</a>
-    </div>
+<div class="breadcrumb"><a href="{{ url_for('list_users') }}">People</a><span aria-hidden="true">/</span><span>Add a person</span></div>
+<header class="page-heading"><div><p class="eyebrow">GROW YOUR DIRECTORY</p><h1>Good connections<br>start here.</h1><p class="page-description">Bring someone new into your people directory.</p></div><span class="heading-detail">A name. An email. A beginning.</span></header>
+<div class="form-layout">
+    <section class="panel form-panel" aria-labelledby="form-title">
+        <div class="panel-heading"><span class="section-number">01</span><div><h2 id="form-title">The essentials</h2><p>A few details to make it personal.</p></div></div>
+        <form action="{{ url_for('create_user') }}" method="post" class="person-form">
+            <div class="field"><label for="name">Full name <span class="required-label">Required</span></label><input type="text" id="name" name="name" placeholder="e.g. Alex Morgan" autocomplete="name" required><p class="field-hint">The name they like to go by.</p></div>
+            <div class="field"><label for="email">Email address <span class="required-label">Required</span></label><input type="email" id="email" name="email" placeholder="alex@example.com" autocomplete="email" required><p class="field-hint">Use a unique email address for each person.</p></div>
+            <div class="form-actions"><a class="text-link" href="{{ url_for('list_users') }}">Cancel</a><button type="submit" class="button button-primary">Create person <span aria-hidden="true">↗</span></button></div>
+        </form>
+    </section>
+    <aside class="editorial-card">
+        <div class="connection-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><span class="art-person art-person-one">a.</span><span class="art-person art-person-two">m.</span><span class="art-center">✳</span><span class="art-dot"></span></div>
+        <p class="eyebrow">LESS ADMIN. MORE HUMAN.</p><h2>Every person.<br>A place to belong.</h2><p>Keep the important details together, so finding the right person feels effortless.</p><div class="editorial-footnote"><span aria-hidden="true">↗</span> Built around the people you know.</div>
+    </aside>
 </div>
 {% endblock %}
