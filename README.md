@@ -1,13 +1,15 @@
-Example 1: Simple Web App (Python Flask + PostgreSQL)
-Use Case: A basic Flask app connected to a PostgreSQL database.
+# People workspace
 
-Docker Images:
+A Python Flask app with a PostgreSQL database and a responsive people directory.
 
-python:3.9-slim (Flask app)
-postgres:15 (Database)
-docker-compose.yml:
+For an automatically timed design preview and simple start/status/stop commands,
+see [managing local servers](docs/local-development.md).
 
-Steps:s
+Local development uses `docker-compose.yml`. Production uses the separately
+configured `docker-compose.production.yml` and the image published by GitHub Actions.
 
-Create a webapp directory with a Dockerfile for your Flask app.
-Run docker-compose up to build and start the containers.
+See [deployment setup and workflow instructions](docs/deployment.md) for registry
+access, server configuration, database volume reuse, and manual deployment.
+
+Run `bash tests/deploy.sh` to check deployment ordering and failure handling with
+a fake Docker CLI, without starting containers or accessing a database.
