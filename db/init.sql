@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT UNIQUE NOT NULL
 );
 
--- Insert sample user (optional)
-INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com');
+-- Optional: Insert sample user
+-- INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com');
