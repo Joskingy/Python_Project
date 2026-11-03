@@ -7,6 +7,17 @@ This builds the portfolio, serves only `dist/`, and automatically stops after
 30 minutes. Ctrl+C stops it early. Rebuild or restart to see content changes.
 For a build without a server, use `uv run --locked python scripts/build.py`.
 
+If Ctrl+C does not reach the preview on Windows, try Ctrl+Break or run this from
+another terminal in the project directory:
+
+```powershell
+uv run --locked python scripts/serve.py --stop
+```
+
+This requests shutdown without terminating unrelated Python processes. It works
+with the updated preview; a process started before this fix must first be stopped
+using its terminal or its specific PID in Task Manager.
+
 The Compose commands below still preview the original Flask sample application.
 They will be replaced with static preview controls in the preview/CI phase.
 

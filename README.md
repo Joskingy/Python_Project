@@ -16,6 +16,8 @@ Add packages with `uv add`; use `uv add --dev` for development tools.
 
 Preview the portfolio with `uv run --locked python scripts/serve.py`, then open
 http://127.0.0.1:5055. Ctrl+C stops it; it also stops automatically after 30 minutes.
+If your terminal does not forward Ctrl+C, run `uv run --locked python scripts/serve.py --stop`
+from another terminal in this directory.
 Edit `content/profile.json` and `content/projects/*.md`, then rebuild or restart
 the preview. The original résumé stays local and is not copied into `dist/`.
 
