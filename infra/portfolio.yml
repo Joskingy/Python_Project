@@ -1,0 +1,286 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Static portfolio hosting with private S3, CloudFront OAC, a Free-only pricing subscription, and GitHub OIDC deployment.
+Metadata:
+  AWSToolsMetrics:
+    AWSAgentToolkit: aws-cloudformation@2
+  com.aws.cloudformation.Context:
+    ref: ../docs/deployment.md
+    must: Deploy in us-east-1. Confirm the FREE subscription is ACTIVE before enabling delivery.
+
+Parameters:
+  ExpectedAccountId:
+    Type: String
+    AllowedPattern: "[0-9]{12}"
+    Description: Account returned by the default profile identity check.
+  GitHubRepository:
+    Type: String
+    Default: Joskingy/Python_Project
+    AllowedPattern: "[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"
+  ExistingGitHubProviderArn:
+    Type: String
+    Default: ""
+    AllowedPattern: "^$|arn:aws:iam::[0-9]{12}:oidc-provider/token.actions.githubusercontent.com"
+    Description: Leave empty to create the account-level GitHub OIDC provider.
+  EnableDelivery:
+    Type: String
+    Default: "false"
+    AllowedValues: ["false", "true"]
+  CachePolicyId:
+    Type: String
+    Default: 658327ea-f89d-4fab-a63d-7e88639e58f6
+    AllowedPattern: "[a-f0-9-]{36}"
+    Description: Managed-CachingOptimized, resolved from AWS during preparation.
+  DeployPermissionsBoundaryArn:
+    Type: String
+    AllowedPattern: "arn:aws:iam::[0-9]{12}:policy/portfolio-bootstrap/[A-Za-z0-9+=,.@_-]+"
+    Description: Boundary created by the one-time infrastructure bootstrap.
+
+Rules:
+  TargetAccount:
+    Assertions:
+      - Assert: !Equals [!Ref AWS::AccountId, !Ref ExpectedAccountId]
+        AssertDescription: Deploy using the verified default account.
+      - Assert: !Equals [!Ref AWS::Region, us-east-1]
+        AssertDescription: CloudFront-scope WAF requires us-east-1.
+
+Conditions:
+  CreateGitHubProvider: !Equals [!Ref ExistingGitHubProviderArn, ""]
+  DeliveryEnabled: !Equals [!Ref EnableDelivery, "true"]
+
+Resources:
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Store the tested static artifact with recovery versions.
+        must: Keep public access blocked and retain data on stack deletion.
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: BoundPreviousVersions
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+
+  OriginAccess:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${AWS::StackName}-s3"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  BrowserHeaders:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub "${AWS::StackName}-headers"
+        SecurityHeadersConfig:
+          ContentSecurityPolicy:
+            ContentSecurityPolicy: "default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'none'"
+            Override: true
+          ContentTypeOptions:
+            Override: true
+          FrameOptions:
+            FrameOption: DENY
+            Override: true
+          ReferrerPolicy:
+            ReferrerPolicy: strict-origin-when-cross-origin
+            Override: true
+          StrictTransportSecurity:
+            AccessControlMaxAgeSec: 31536000
+            Override: true
+
+  WebAcl:
+    Type: AWS::WAFv2::WebACL
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: A dedicated web ACL is required for the CloudFront Free subscription.
+        must: Verify subscription activation. Standalone WAF has usage charges.
+    Properties:
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: false
+        SampledRequestsEnabled: false
+        MetricName: !Sub "${AWS::StackName}-web"
+      Rules:
+        - Name: RequestRate
+          Priority: 0
+          Action:
+            Block: {}
+          Statement:
+            RateBasedStatement:
+              AggregateKeyType: IP
+              Limit: 2000
+              EvaluationWindowSec: 300
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: false
+            SampledRequestsEnabled: false
+            MetricName: RequestRate
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Serve static pages over HTTPS from a private S3 origin.
+        must: Begin disabled. Activate the Free plan before enabling delivery.
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "${AWS::StackName} portfolio"
+        Enabled: !If [DeliveryEnabled, true, false]
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        WebACLId: !GetAtt WebAcl.Arn
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+        Origins:
+          - Id: Site
+            DomainName: !GetAtt SiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt OriginAccess.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        DefaultCacheBehavior:
+          TargetOriginId: Site
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          CachedMethods: [GET, HEAD]
+          Compress: true
+          CachePolicyId: !Ref CachePolicyId
+          ResponseHeadersPolicyId: !Ref BrowserHeaders
+
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: CloudFrontRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${SiteBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+                AWS:SourceAccount: !Ref AWS::AccountId
+          - Sid: RequireHttps
+            Effect: Deny
+            Principal: "*"
+            Action: s3:*
+            Resource:
+              - !GetAtt SiteBucket.Arn
+              - !Sub "${SiteBucket.Arn}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+
+  FreePlan:
+    Type: AWS::PricingPlanManager::Subscription
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Request the zero-dollar CloudFront plan without paid-tier fallback.
+        must: PlanTier remains FREE. Verify ACTIVE after stack creation.
+    Properties:
+      PlanFamily: CloudFront
+      PlanTier: FREE
+      ResourceArns:
+        - !Sub "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+        - !GetAtt WebAcl.Arn
+
+  GitHubProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateGitHubProvider
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: [sts.amazonaws.com]
+
+  GitHubDeployRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Publish the tested artifact using temporary GitHub credentials.
+        must: Trust only this repository's production environment. Restrict that environment to main in GitHub.
+    Properties:
+      Path: /portfolio/
+      PermissionsBoundary: !Ref DeployPermissionsBoundaryArn
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                !If [
+                  CreateGitHubProvider,
+                  !Ref GitHubProvider,
+                  !Ref ExistingGitHubProviderArn,
+                ]
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubRepository}:environment:production"
+      Policies:
+        - PolicyName: PublishSite
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt SiteBucket.Arn
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub "${SiteBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  [cloudfront:CreateInvalidation, cloudfront:GetInvalidation]
+                Resource: !Sub "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+              - Effect: Allow
+                Action: pricingplanmanager:GetSubscription
+                Resource: !Ref FreePlan
+
+Outputs:
+  SiteBucketName:
+    Description: GitHub variable AWS_SITE_BUCKET.
+    Value: !Ref SiteBucket
+  DistributionId:
+    Description: GitHub variable AWS_DISTRIBUTION_ID.
+    Value: !Ref Distribution
+  SiteUrl:
+    Description: HTTPS URL after delivery is enabled and content is published.
+    Value: !Sub "https://${Distribution.DomainName}"
+  DeployRoleArn:
+    Description: GitHub variable AWS_DEPLOY_ROLE_ARN.
+    Value: !GetAtt GitHubDeployRole.Arn
+  FreePlanArn:
+    Description: GitHub variable AWS_FREE_PLAN_ARN.
+    Value: !Ref FreePlan
+  FreePlanStatus:
+    Description: Confirm ACTIVE using GetSubscription before enabling delivery.
+    Value: !GetAtt FreePlan.Status

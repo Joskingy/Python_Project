@@ -37,6 +37,9 @@ jobs:
       - name: Run tests
         run: uv run --locked pytest -q
 
+      - name: Validate hosting infrastructure
+        run: uv tool run --from cfn-lint==1.59.0 cfn-lint infra/portfolio.yml infra/infrastructure-access.yml
+
       - name: Build static portfolio and check links
         run: uv run --locked python scripts/build.py
 
@@ -47,3 +50,93 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 7
+
+  deploy:
+    name: Publish portfolio
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      vars.AWS_DEPLOY_ENABLED == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    concurrency:
+      group: portfolio-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+      AWS_SITE_BUCKET: ${{ vars.AWS_SITE_BUCKET }}
+      AWS_DISTRIBUTION_ID: ${{ vars.AWS_DISTRIBUTION_ID }}
+      AWS_FREE_PLAN_ARN: ${{ vars.AWS_FREE_PLAN_ARN }}
+      AWS_SITE_URL: ${{ vars.AWS_SITE_URL }}
+    steps:
+      - name: Download tested site
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: portfolio-${{ github.sha }}
+          path: site
+
+      - name: Check deployment configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${AWS_ACCOUNT_ID:?Set AWS_ACCOUNT_ID}"
+          : "${AWS_SITE_BUCKET:?Set AWS_SITE_BUCKET}"
+          : "${AWS_DISTRIBUTION_ID:?Set AWS_DISTRIBUTION_ID}"
+          : "${AWS_FREE_PLAN_ARN:?Set AWS_FREE_PLAN_ARN}"
+          : "${AWS_SITE_URL:?Set AWS_SITE_URL}"
+          test -f site/index.html
+          test -f site/projects/bototoolkit.html
+          test -f site/projects/brewmaster.html
+
+      - name: Authenticate to AWS
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+          role-session-name: portfolio-${{ github.run_id }}
+          unset-current-credentials: true
+
+      - name: Require the active Free plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws pricing-plan-manager get-subscription \
+            --arn "$AWS_FREE_PLAN_ARN" --region us-east-1 > plan.json
+          jq -e --arg distribution "arn:aws:cloudfront::${AWS_ACCOUNT_ID}:distribution/${AWS_DISTRIBUTION_ID}" \
+            '.subscription | .planFamily == "CloudFront" and .planTier == "FREE" and (.currentPlanTier // .planTier) == "FREE" and .status == "ACTIVE" and (.resourceArns | index($distribution) != null)' \
+            plan.json
+
+      - name: Upload assets then pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws s3 sync site/assets/ "s3://${AWS_SITE_BUCKET}/assets/" \
+            --cache-control 'public,max-age=300' --only-show-errors
+          aws s3 sync site/ "s3://${AWS_SITE_BUCKET}/" \
+            --exclude '*' --include '*.html' \
+            --cache-control 'public,max-age=60,must-revalidate' --only-show-errors
+
+      - name: Refresh the CDN
+        shell: bash
+        run: |
+          set -euo pipefail
+          invalidation=$(aws cloudfront create-invalidation \
+            --distribution-id "$AWS_DISTRIBUTION_ID" --paths '/*' \
+            --query 'Invalidation.Id' --output text)
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$AWS_DISTRIBUTION_ID" --id "$invalidation"
+
+      - name: Verify published pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          for page in index.html projects/bototoolkit.html projects/brewmaster.html; do
+            curl --fail --silent --show-error --retry 3 \
+              --output /dev/null "${AWS_SITE_URL%/}/$page"
+          done
