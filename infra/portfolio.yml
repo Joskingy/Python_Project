@@ -276,10 +276,10 @@ Outputs:
     Description: HTTPS URL after delivery is enabled and content is published.
     Value: !Sub "https://${Distribution.DomainName}"
   DeployRoleArn:
-    Description: GitHub variable AWS_DEPLOY_ROLE_ARN.
+    Description: Production environment secret AWS_DEPLOY_ROLE_ARN.
     Value: !GetAtt GitHubDeployRole.Arn
   FreePlanArn:
-    Description: GitHub variable AWS_FREE_PLAN_ARN.
+    Description: Production environment secret AWS_FREE_PLAN_ARN.
     Value: !Ref FreePlan
   FreePlanStatus:
     Description: Confirm ACTIVE using GetSubscription before enabling delivery.

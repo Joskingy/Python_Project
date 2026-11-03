@@ -239,15 +239,15 @@ Resources:
 
 Outputs:
   PlanRoleArn:
-    Description: Repository variable AWS_INFRA_PLAN_ROLE_ARN.
+    Description: Repository secret AWS_INFRA_PLAN_ROLE_ARN.
     Value: !GetAtt PlanRole.Arn
   ApplyRoleArn:
-    Description: Environment variable AWS_INFRA_APPLY_ROLE_ARN on infrastructure-production.
+    Description: Environment secret AWS_INFRA_APPLY_ROLE_ARN on infrastructure-production.
     Value: !GetAtt ApplyRole.Arn
   GitHubProviderArn:
-    Description: Repository variable AWS_GITHUB_PROVIDER_ARN.
+    Description: Repository secret AWS_GITHUB_PROVIDER_ARN.
     Value:
       !If [CreateProvider, !Ref GitHubProvider, !Ref ExistingGitHubProviderArn]
   DeployBoundaryArn:
-    Description: Repository variable AWS_DEPLOY_BOUNDARY_ARN.
+    Description: Repository secret AWS_DEPLOY_BOUNDARY_ARN.
     Value: !Ref DeployBoundary

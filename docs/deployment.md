@@ -40,9 +40,9 @@ bootstrap. The provider and publishing boundary are retained on stack deletion.
 The workflow manages only the hosting stack. Manage this access stack locally
 with `default`, so the workflow cannot change its own roles or boundary.
 
-Set these **repository variables** from the access stack outputs.
+Set these **repository secrets** from the access stack outputs.
 
-| Variable | Value |
+| Repository secret | Value |
 | --- | --- |
 | `AWS_ACCOUNT_ID` | Verified default account ID |
 | `AWS_INFRA_PLAN_ROLE_ARN` | `PlanRoleArn` output |
@@ -53,7 +53,7 @@ Create the `infrastructure-production` GitHub environment before running the
 workflow. Add Oscar as a required reviewer, restrict deployment branches to the
 selected branch `main`, and disable administrator bypass. Leave prevention of
 self-review off when Oscar starts and approves his own deployment. Store
-`AWS_INFRA_APPLY_ROLE_ARN` as an **environment variable** using `ApplyRoleArn`.
+`AWS_INFRA_APPLY_ROLE_ARN` as an **environment secret** using `ApplyRoleArn`.
 This keeps the apply role configuration behind the approval gate.
 
 GitHub environment protection is configured in repository Settings, under
@@ -72,7 +72,7 @@ Merge the reviewed workflow and templates into `main`. In GitHub Actions, run
 3. Approve the pending `infrastructure-production` deployment to execute that
    exact change set. Reject it to leave the proposed changes unapplied.
 4. The apply job waits for CloudFormation, checks the active Free subscription,
-   and lists stack outputs in its summary.
+   and reports completion in its summary. Retrieve stack outputs privately in the AWS console.
 
 Subsequent runs preserve delivery by default. Select `enable` only after the
 initial stack has an active Free subscription. Select `disable` to stop delivery.
@@ -91,16 +91,16 @@ be added after its name and registration cost are agreed.
 ## Connect GitHub Actions
 
 Create the GitHub `production` environment and restrict deployments to `main`.
-Set its environment variables from the hosting stack outputs in the infrastructure run summary.
+Configure its secrets and variables from the hosting stack outputs in the AWS console.
 
-| Variable | Value |
-| --- | --- |
-| `AWS_ACCOUNT_ID` | Verified default account ID |
-| `AWS_DEPLOY_ROLE_ARN` | `DeployRoleArn` output |
-| `AWS_SITE_BUCKET` | `SiteBucketName` output |
-| `AWS_DISTRIBUTION_ID` | `DistributionId` output |
-| `AWS_FREE_PLAN_ARN` | `FreePlanArn` output |
-| `AWS_SITE_URL` | `SiteUrl` output |
+| Setting | Storage | Value |
+| --- | --- | --- |
+| `AWS_ACCOUNT_ID` | Repository secret | Verified default account ID |
+| `AWS_DEPLOY_ROLE_ARN` | Production environment secret | `DeployRoleArn` output |
+| `AWS_FREE_PLAN_ARN` | Production environment secret | `FreePlanArn` output |
+| `AWS_SITE_BUCKET` | Production environment variable | `SiteBucketName` output |
+| `AWS_DISTRIBUTION_ID` | Production environment variable | `DistributionId` output |
+| `AWS_SITE_URL` | Production environment variable | `SiteUrl` output |
 
 Set the repository-level variable `AWS_DEPLOY_ENABLED` to `true` only after the
 stack, Free subscription, and environment branch restriction have been checked.
@@ -117,6 +117,18 @@ The upload keeps existing objects so cached pages can still load their assets.
 Review unused current objects during occasional maintenance. S3 retains prior
 versions for 30 days. A publication is a sequence of object uploads. A failed upload
 can leave a partial release, so rerun the failed workflow to finish it.
+
+## Actions output privacy
+
+Account IDs and configured ARNs use GitHub secrets so GitHub can mask them before
+step inputs and environment values are logged. Credential actions also enable
+account masking, and each AWS job masks its assumed-role ARN before further calls.
+Migrate any matching existing GitHub variables to the secret locations above.
+
+The infrastructure summary shows logical resource changes and the change-set name.
+The apply summary reports completion. Full stack outputs stay in the AWS console.
+The workflow passes a change-set name between jobs so masking does not block the
+approval job's input. Historical logs retain their previous visibility.
 
 ## Rollback
 

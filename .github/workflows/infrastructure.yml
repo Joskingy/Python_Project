@@ -19,7 +19,7 @@ concurrency:
 env:
   AWS_REGION: us-east-1
   STACK_NAME: oscar-portfolio
-  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
 jobs:
   plan:
@@ -50,8 +50,9 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-region: us-east-1
-          role-to-assume: ${{ vars.AWS_INFRA_PLAN_ROLE_ARN }}
-          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+          role-to-assume: ${{ secrets.AWS_INFRA_PLAN_ROLE_ARN }}
+          allowed-account-ids: ${{ secrets.AWS_ACCOUNT_ID }}
+          mask-aws-account-id: true
           unset-current-credentials: true
 
       - name: Create and summarize change set
@@ -59,13 +60,15 @@ jobs:
         shell: bash
         env:
           DELIVERY: ${{ inputs.delivery }}
-          PROVIDER_ARN: ${{ vars.AWS_GITHUB_PROVIDER_ARN }}
-          BOUNDARY_ARN: ${{ vars.AWS_DEPLOY_BOUNDARY_ARN }}
+          PROVIDER_ARN: ${{ secrets.AWS_GITHUB_PROVIDER_ARN }}
+          BOUNDARY_ARN: ${{ secrets.AWS_DEPLOY_BOUNDARY_ARN }}
         run: |
           set -euo pipefail
-          : "${AWS_ACCOUNT_ID:?Set repository AWS_ACCOUNT_ID}"
-          : "${PROVIDER_ARN:?Set repository AWS_GITHUB_PROVIDER_ARN}"
-          : "${BOUNDARY_ARN:?Set repository AWS_DEPLOY_BOUNDARY_ARN}"
+          : "${AWS_ACCOUNT_ID:?Set repository secret AWS_ACCOUNT_ID}"
+          : "${PROVIDER_ARN:?Set repository secret AWS_GITHUB_PROVIDER_ARN}"
+          : "${BOUNDARY_ARN:?Set repository secret AWS_DEPLOY_BOUNDARY_ARN}"
+          caller_arn=$(aws sts get-caller-identity --query Arn --output text)
+          echo "::add-mask::$caller_arn"
           change_type=UPDATE
           if ! aws cloudformation describe-stacks --stack-name "$STACK_NAME" > stack.json 2> stack-error.txt; then
             if grep -q 'does not exist' stack-error.txt; then
@@ -92,8 +95,9 @@ jobs:
             aws pricing-plan-manager get-subscription --arn "$plan_arn" > subscription.json
             jq -e '.subscription | .planTier == "FREE" and (.currentPlanTier // .planTier) == "FREE" and .status == "ACTIVE"' subscription.json
           fi
-          change_set=$(aws cloudformation create-change-set \
-            --stack-name "$STACK_NAME" --change-set-name "portfolio-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+          change_set="portfolio-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          aws cloudformation create-change-set \
+            --stack-name "$STACK_NAME" --change-set-name "$change_set" \
             --change-set-type "$change_type" --template-body file://infra/portfolio.yml \
             --description "Portfolio infrastructure ${GITHUB_SHA}" --capabilities CAPABILITY_IAM \
             --parameters \
@@ -101,31 +105,32 @@ jobs:
               "ParameterKey=ExistingGitHubProviderArn,ParameterValue=$PROVIDER_ARN" \
               "ParameterKey=DeployPermissionsBoundaryArn,ParameterValue=$BOUNDARY_ARN" \
               "ParameterKey=EnableDelivery,ParameterValue=$ENABLE_DELIVERY" \
-            --query Id --output text)
+            > /dev/null
           echo "change_set=$change_set" >> "$GITHUB_OUTPUT"
           echo "change_type=$change_type" >> "$GITHUB_OUTPUT"
-          if ! aws cloudformation wait change-set-create-complete --change-set-name "$change_set"; then
-            aws cloudformation describe-change-set --change-set-name "$change_set" > change-set.json
+          if ! aws cloudformation wait change-set-create-complete --stack-name "$STACK_NAME" --change-set-name "$change_set"; then
+            aws cloudformation describe-change-set --stack-name "$STACK_NAME" --change-set-name "$change_set" > change-set.json
             if jq -e --arg reason "didn't contain changes" '.Status == "FAILED" and (.StatusReason | contains($reason) or contains("did not contain changes"))' change-set.json; then
               echo 'has_changes=false' >> "$GITHUB_OUTPUT"
               echo 'No infrastructure changes to apply.' >> "$GITHUB_STEP_SUMMARY"
-              aws cloudformation delete-change-set --change-set-name "$change_set"
+              aws cloudformation delete-change-set --stack-name "$STACK_NAME" --change-set-name "$change_set"
               exit 0
             fi
-            cat change-set.json >&2
+            echo 'Change set creation failed. Inspect its details in the AWS console.' >&2
             exit 1
           fi
-          aws cloudformation describe-change-set --change-set-name "$change_set" > change-set.json
+          aws cloudformation describe-change-set --stack-name "$STACK_NAME" --change-set-name "$change_set" > change-set.json
           echo 'has_changes=true' >> "$GITHUB_OUTPUT"
           {
             echo "## Review infrastructure changes"
             echo "Commit $GITHUB_SHA"
+            echo "Change set $change_set"
             echo
             echo '| Action | Resource | Type | Replacement |'
             echo '| --- | --- | --- | --- |'
             jq -r '.Changes[].ResourceChange | "| \(.Action) | \(.LogicalResourceId) | \(.ResourceType) | \(.Replacement // "—") |"' change-set.json
             echo
-            echo "[Review in AWS](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/changeset/detail?changeSetId=$change_set)"
+            echo "[Review in AWS](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=$STACK_NAME)"
           } >> "$GITHUB_STEP_SUMMARY"
 
   apply:
@@ -146,9 +151,10 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-region: us-east-1
-          role-to-assume: ${{ vars.AWS_INFRA_APPLY_ROLE_ARN }}
-          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+          role-to-assume: ${{ secrets.AWS_INFRA_APPLY_ROLE_ARN }}
+          allowed-account-ids: ${{ secrets.AWS_ACCOUNT_ID }}
           role-duration-seconds: 7200
+          mask-aws-account-id: true
           unset-current-credentials: true
 
       - name: Execute the reviewed change set
@@ -158,6 +164,8 @@ jobs:
           CHANGE_TYPE: ${{ needs.plan.outputs.change_type }}
         run: |
           set -euo pipefail
+          caller_arn=$(aws sts get-caller-identity --query Arn --output text)
+          echo "::add-mask::$caller_arn"
           aws cloudformation execute-change-set --stack-name "$STACK_NAME" --change-set-name "$CHANGE_SET"
           if [[ "$CHANGE_TYPE" == CREATE ]]; then
             aws cloudformation wait stack-create-complete --stack-name "$STACK_NAME"
@@ -171,5 +179,6 @@ jobs:
           {
             echo '## Infrastructure updated'
             echo
-            jq -r '.Stacks[0].Outputs[] | "- **\(.OutputKey)** \(.OutputValue)"' stack.json
+            echo 'CloudFormation completed and the Free subscription is active.'
+            echo 'Retrieve stack outputs privately in the AWS console to configure site publishing.'
           } >> "$GITHUB_STEP_SUMMARY"
