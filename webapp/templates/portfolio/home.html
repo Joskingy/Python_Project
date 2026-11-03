@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero" aria-labelledby="intro-title">
+  <div class="hero-top"><p class="eyebrow">{{ profile.focus }}</p><span class="location">{{ profile.location }}</span></div>
+  <h1 id="intro-title">{{ profile.headline }}<br><span>{{ profile.headline_accent }}</span></h1>
+  <div class="hero-bottom"><p class="lede">{{ profile.intro }}</p><a class="button" href="#work">Explore selected work <span aria-hidden="true">↓</span></a></div>
+</section>
+<div class="highlights" aria-label="Professional background">{% for item in profile.highlights %}<div><strong>{{ item.value }}</strong><span>{{ item.label }}</span></div>{% endfor %}</div>
+<section id="work" class="section" aria-labelledby="work-title">
+  <div class="section-heading"><div><p class="eyebrow">01 / Selected work</p><h2 id="work-title">Built to be understood.<br>Designed to be operated.</h2></div><p>Independent projects and hands-on labs.<br>The decisions, the evidence, and the lessons.</p></div>
+  <div class="project-list">{% for project in profile.projects %}<article class="project-card"><div class="project-marker" aria-hidden="true">0{{ loop.index }}<span>{{ project.category }}</span></div><div class="project-content"><div class="project-meta"><span>{{ project.category }}</span><span class="status">{{ project.status }}</span></div><h3><a href="projects/{{ project.slug }}.html">{{ project.title }}</a></h3><p>{{ project.summary }}</p><ul class="tags" aria-label="Technologies">{% for item in project.stack %}<li>{{ item }}</li>{% endfor %}</ul><a class="case-link" href="projects/{{ project.slug }}.html">Read the case study <span aria-hidden="true">↗</span></a></div></article>{% endfor %}</div>
+</section>
+<section id="experience" class="section" aria-labelledby="experience-title"><div class="section-heading"><div><p class="eyebrow">02 / Experience</p><h2 id="experience-title">An operator's perspective.<br>An engineer's approach.</h2></div></div><div class="experience-list">{% for item in profile.experience %}<article class="experience-item"><p class="dates">{{ item.dates }}</p><div><h3>{{ item.role }}</h3><p class="company">{{ item.company }}</p><p>{{ item.description }}</p></div></article>{% endfor %}</div></section>
+<section id="about" class="section about-layout" aria-labelledby="about-title"><div><p class="eyebrow">03 / Beyond the stack</p><h2 id="about-title">Good infrastructure starts<br>with understanding.</h2><p class="about-copy">{{ profile.about }}</p><p class="education">{{ profile.education }}</p></div><div class="credentials"><p class="eyebrow">Certifications</p>{% for certificate in profile.certifications %}<div><h3>{{ certificate.name }}</h3><p>{{ certificate.date }}</p></div>{% endfor %}</div></section>
+<section class="skills section" aria-label="Technical focus">{% for group in profile.skills %}<div><h3>{{ group.name }}</h3><p>{{ group['items']|join(' · ') }}</p></div>{% endfor %}</section>
+<section id="contact" class="contact section" aria-labelledby="contact-title"><p class="eyebrow">04 / Let's connect</p><h2 id="contact-title">Build with care.<br><span>Make it dependable.</span></h2><p>Interested in my work across DevOps, SRE, and Platform Engineering?</p><div class="contact-links"><a class="button" href="mailto:{{ profile.email }}">Email Oscar <span aria-hidden="true">↗</span></a><a href="{{ profile.github }}">GitHub ↗</a><a href="{{ profile.linkedin }}">LinkedIn ↗</a></div></section>
+{% endblock %}
