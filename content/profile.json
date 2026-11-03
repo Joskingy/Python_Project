@@ -1,0 +1,40 @@
+{
+  "name": "Oscar Valdes",
+  "full_name": "Oscar Eugenio Valdes Arrambide",
+  "location": "Monterrey, Mexico",
+  "focus": "DevOps / SRE / Platform Engineering",
+  "headline": "Infrastructure with intention.",
+  "headline_accent": "Operations with confidence.",
+  "intro": "I bring a managed-services perspective to cloud engineering: understand the application, automate the repeatable work, and make recovery part of the design.",
+  "about": "My background spans enterprise application support, AWS architecture, and engineering leadership. At Kalypso, I progressed from application support to leading Managed Services, supporting enterprise clients and building cloud hosting and deployment capabilities. My independent work now focuses on Kubernetes operations and practical Python automation.",
+  "email": "odyva@hotmail.com",
+  "github": "https://github.com/Joskingy",
+  "linkedin": "https://www.linkedin.com/in/oscar-vald%C3%A9s-arrambide-028571101/",
+  "highlights": [
+    {"value": "7–12", "label": "engineers led in Managed Services"},
+    {"value": "10+", "label": "enterprise clients supported by the team"},
+    {"value": "AWS", "label": "architecture, automation, and operations"}
+  ],
+  "skills": [
+    {"name": "Cloud & infrastructure", "items": ["AWS", "Terraform", "Ansible", "IAM", "VPC", "EC2", "RDS"]},
+    {"name": "Delivery & platforms", "items": ["Kubernetes", "EKS", "Helm", "Docker", "GitHub Actions", "Azure Pipelines"]},
+    {"name": "Operations & automation", "items": ["Python", "Boto3", "Bash", "CloudWatch", "Grafana", "Datadog"]}
+  ],
+  "experience": [
+    {"company": "Independent projects", "role": "Cloud engineering & professional development", "dates": "2022–present", "description": "Hands-on work with EKS, Helm, application troubleshooting, network policies, autoscaling, and rollback testing. Additional projects explore AWS serverless applications and local LLM tooling."},
+    {"company": "Kalypso", "role": "Senior Cloud Consultant · Lead Engineer, Managed Services", "dates": "2019–2022", "description": "Led a 7–12-person team supporting 10+ enterprise clients. Designed AWS architectures for PLM and IoT applications, provisioned infrastructure with Terraform, and built deployment pipelines and monitoring practices."},
+    {"company": "Kalypso", "role": "Technical Consultant", "dates": "2018–2019", "description": "Initiated AWS hosting and DevOps offerings, designed client cloud architectures, and guided engineers on Windchill and ThingWorx deployments and support."},
+    {"company": "Kalypso", "role": "Application Support Technician → Senior Application Support Technician", "dates": "2015–2018", "description": "Supported enterprise applications under SLA commitments, investigated clustering, database, and identity-integration issues, and developed troubleshooting practices."},
+    {"company": "Grupo Carza / Epicor", "role": "IT Analyst & Developer / Software Engineer Intern", "dates": "2014–2015", "description": "Developed and supported enterprise applications using .NET, JavaScript, and SQL Server."}
+  ],
+  "certifications": [
+    {"name": "AWS Certified Solutions Architect – Associate", "date": "Earned December 2024"},
+    {"name": "AWS Certified Cloud Practitioner", "date": "Earned September 2024"}
+  ],
+  "education": "Bachelor of Software Engineering · Universidad Regiomontana · 2015",
+  "projects": [
+    {"slug": "bototoolkit", "title": "BotoToolkit", "subtitle": "A more deliberate AWS operations workflow.", "category": "Python automation", "status": "Independent project", "summary": "An Amplify operations CLI with verified identity, deployment investigation, redacted configuration comparisons, and explicitly reviewed deployment retries.", "stack": ["Python", "Boto3", "Typer", "Rich", "uv"], "repository": "https://github.com/Joskingy/BotoToolkit", "document": "bototoolkit.md"},
+    {"slug": "kubernetes-operations", "title": "Kubernetes operations lab", "subtitle": "Practice the failure. Understand the recovery.", "category": "Platform reliability", "status": "Independent lab", "summary": "Hands-on EKS and Helm exercises covering deployment failures, networking, autoscaling, upgrades, and application rollback.", "stack": ["EKS", "Kubernetes", "Helm", "ECR", "ALB"], "document": "kubernetes-operations.md"},
+    {"slug": "portfolio-engineering", "title": "The portfolio, engineered", "subtitle": "A small site with a considered delivery process.", "category": "Delivery engineering", "status": "In progress", "summary": "A Python-generated static portfolio with locked dependencies, editable case studies, and a planned artifact-based AWS delivery workflow.", "stack": ["Python", "Jinja", "Markdown", "uv", "GitHub Actions"], "repository": "https://github.com/Joskingy/Python_Project", "document": "portfolio-engineering.md"}
+  ]
+}

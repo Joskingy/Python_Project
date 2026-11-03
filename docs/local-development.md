@@ -1,11 +1,21 @@
 # Managing local servers
 
+## Static portfolio
+
+Run `uv run --locked python scripts/serve.py` and open http://127.0.0.1:5055.
+This builds the portfolio, serves only `dist/`, and automatically stops after
+30 minutes. Ctrl+C stops it early. Rebuild or restart to see content changes.
+For a build without a server, use `uv run --locked python scripts/build.py`.
+
+The Compose commands below still preview the original Flask sample application.
+They will be replaced with static preview controls in the preview/CI phase.
+
 Install dependencies with `uv sync --locked` from the repository root. This uses
 Python 3.13 and creates a local `.venv`. Run page checks with `uv run --locked pytest -q`.
 For a preview without Docker, run `uv run --locked python scripts/preview.py`;
 it uses sample records and automatically stops after 30 minutes. Ctrl+C stops it early.
 
-## Design preview (sample records only)
+## Legacy design preview (sample records only)
 
 From the repository directory in PowerShell, with Docker Desktop running:
 

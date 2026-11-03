@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="{{ description }}">
+  <title>{{ title }} · DevOps & Platform Engineering</title>
+  <link rel="stylesheet" href="{{ prefix }}assets/portfolio.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="wordmark" href="{{ prefix }}index.html" aria-label="Oscar Valdes home"><span class="monogram" aria-hidden="true">ov.</span><span>{{ profile.name }}</span></a>
+    <nav aria-label="Main navigation"><a href="{{ prefix }}index.html#work">Work</a><a href="{{ prefix }}index.html#experience">Experience</a><a href="{{ prefix }}engineering.html">Engineering</a><a class="nav-contact" href="{{ prefix }}index.html#contact">Get in touch <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main id="main" class="wrap" tabindex="-1">{% block content %}{% endblock %}</main>
+  <footer class="site-footer wrap"><span>{{ profile.name }} · {{ profile.location }}</span><a href="{{ prefix }}engineering.html">A considered approach to delivery <span aria-hidden="true">↗</span></a></footer>
+</body>
+</html>
