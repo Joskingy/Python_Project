@@ -107,15 +107,36 @@ def build():
         document = (CONTENT / "projects" / project["document"]).read_text(
             encoding="utf-8"
         )
+        tokens = markdown.parse(document)
+        sections = []
+        used_ids = set()
+        for index, token in enumerate(tokens):
+            if token.type == "heading_open" and token.tag == "h2":
+                heading = tokens[index + 1].content
+                slug = (
+                    re.sub(r"[^a-z0-9]+", "-", heading.lower()).strip("-") or "section"
+                )
+                anchor = slug
+                suffix = 2
+                while anchor in used_ids:
+                    anchor = f"{slug}-{suffix}"
+                    suffix += 1
+                used_ids.add(anchor)
+                token.attrSet("id", anchor)
+                sections.append({"id": anchor, "title": heading})
         pages[f"projects/{project['slug']}.html"] = env.get_template(
-            "article.html"
+            {
+                "bototoolkit": "bototoolkit.html",
+                "brewmaster": "brewmaster.html",
+            }.get(project["slug"], "article.html")
         ).render(
             profile=profile,
             project=project,
             prefix="../",
             title=project["title"],
             description=project["summary"],
-            body=Markup(markdown.render(document)),
+            body=Markup(markdown.renderer.render(tokens, markdown.options, {})),
+            sections=sections,
         )
     engineering = (CONTENT / "engineering.md").read_text(encoding="utf-8")
     pages["engineering.html"] = env.get_template("article.html").render(
@@ -144,6 +165,7 @@ def build():
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(html, encoding="utf-8")
     shutil.copy2(ROOT / "webapp/static/portfolio.css", output / "assets/portfolio.css")
+    shutil.copytree(ROOT / "webapp/static/fonts", output / "assets/fonts")
     validate_links(output)
     print(f"Built {len(pages)} pages in dist/; local links checked.")
     return output

@@ -3,9 +3,9 @@
   "full_name": "Oscar Eugenio Valdes Arrambide",
   "location": "Monterrey, Mexico",
   "focus": "DevOps / SRE / Platform Engineering",
-  "headline": "Infrastructure with intention.",
+  "headline": "Cloud engineering. Grounded in operations.",
   "headline_accent": "Operations with confidence.",
-  "intro": "I bring a managed-services perspective to cloud engineering: understand the application, automate the repeatable work, and make recovery part of the design.",
+  "intro": "I’m Oscar Valdes. I bring enterprise application support, AWS architecture, and engineering leadership to practical automation and dependable platforms.",
   "about": "My background spans enterprise application support, AWS architecture, and engineering leadership. At Kalypso, I progressed from application support to leading Managed Services, supporting enterprise clients and building cloud hosting and deployment capabilities. My independent work now focuses on Kubernetes operations and practical Python automation.",
   "email": "odyva@hotmail.com",
   "github": "https://github.com/Joskingy",
@@ -34,6 +34,7 @@
   "education": "Bachelor of Software Engineering · Universidad Regiomontana · 2015",
   "projects": [
     {"slug": "bototoolkit", "title": "BotoToolkit", "subtitle": "A more deliberate AWS operations workflow.", "category": "Python automation", "status": "Independent project", "summary": "An Amplify operations CLI with verified identity, deployment investigation, redacted configuration comparisons, and explicitly reviewed deployment retries.", "stack": ["Python", "Boto3", "Typer", "Rich", "uv"], "repository": "https://github.com/Joskingy/BotoToolkit", "document": "bototoolkit.md"},
+    {"slug": "brewmaster", "title": "BrewMaster", "subtitle": "AWS delivery, access, and recovery.", "category": "AWS architecture & delivery", "status": "Collaborative project", "summary": "My contributions to a coffee recipe application span AWS deployment workflows, OIDC authentication, environment-specific builds, and AppSync recovery.", "stack": ["AWS Amplify", "GitHub Actions", "OIDC", "Cognito", "AppSync"], "document": "brewmaster.md"},
     {"slug": "kubernetes-operations", "title": "Kubernetes operations lab", "subtitle": "Practice the failure. Understand the recovery.", "category": "Platform reliability", "status": "Independent lab", "summary": "Hands-on EKS and Helm exercises covering deployment failures, networking, autoscaling, upgrades, and application rollback.", "stack": ["EKS", "Kubernetes", "Helm", "ECR", "ALB"], "document": "kubernetes-operations.md"},
     {"slug": "portfolio-engineering", "title": "The portfolio, engineered", "subtitle": "A small site with a considered delivery process.", "category": "Delivery engineering", "status": "In progress", "summary": "A Python-generated static portfolio with locked dependencies, editable case studies, and a planned artifact-based AWS delivery workflow.", "stack": ["Python", "Jinja", "Markdown", "uv", "GitHub Actions"], "repository": "https://github.com/Joskingy/Python_Project", "document": "portfolio-engineering.md"}
   ]
