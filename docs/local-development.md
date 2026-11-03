@@ -1,5 +1,10 @@
 # Managing local servers
 
+Install dependencies with `uv sync --locked` from the repository root. This uses
+Python 3.13 and creates a local `.venv`. Run page checks with `uv run --locked pytest -q`.
+For a preview without Docker, run `uv run --locked python scripts/preview.py`;
+it uses sample records and automatically stops after 30 minutes. Ctrl+C stops it early.
+
 ## Design preview (sample records only)
 
 From the repository directory in PowerShell, with Docker Desktop running:

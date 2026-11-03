@@ -1,3 +1,9 @@
 /webapp/__pycache__
 .env
 Project1.code-workspace
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+dist/
+.env.*

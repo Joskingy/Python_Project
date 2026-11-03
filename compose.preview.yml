@@ -1,7 +1,9 @@
 # A separate, disposable design preview. It never starts the real database.
 services:
   preview:
-    build: ./webapp
+    build:
+      context: .
+      dockerfile: webapp/Dockerfile
     command: [python, -u, /preview/preview.py]
     init: true
     restart: "no"

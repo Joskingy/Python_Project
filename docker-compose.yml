@@ -1,6 +1,8 @@
 services:
   webapp:
-    build: ./webapp
+    build:
+      context: .
+      dockerfile: webapp/Dockerfile
     ports:
       - "5000:5000"
     volumes:
