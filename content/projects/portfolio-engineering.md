@@ -17,7 +17,11 @@ The portfolio now has a Python build step that renders Jinja templates and Markd
 
 ## Current state and next steps
 
-The existing repository workflow builds container images and includes page and deployment checks. Moving it to static-site artifacts, finalizing the midnight-blue UI, and adding AWS hosting are upcoming phases. This portfolio is **not yet presented as deployed to S3 or CloudFront**.
+The repository workflow now lints and tests changes, builds the static portfolio,
+checks links, and saves a downloadable site artifact. It runs on `dev`, `main`,
+and pull requests targeting `main`. Production deployment is disabled while the
+midnight-blue UI and AWS hosting setup are completed. This portfolio is **not yet
+presented as deployed to S3 or CloudFront**.
 
 The intended hosting design is private S3 behind CloudFront, with GitHub OIDC for deployment access. Infrastructure setup, a domain, and a first production release remain to be completed.
 

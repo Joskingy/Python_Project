@@ -25,11 +25,10 @@ The original Flask/Compose application remains available during the transition.
 Its containers and source are separate from the generated portfolio.
 See [local development](docs/local-development.md) for the legacy preview controls.
 
-Legacy Flask development uses `docker-compose.yml`. Its deployment uses the separately
-configured `docker-compose.production.yml` and the image published by GitHub Actions.
-
-See [deployment setup and workflow instructions](docs/deployment.md) for registry
-access, server configuration, database volume reuse, and manual deployment.
+GitHub Actions validates changes on `dev`, `main`, and pull requests to `main`.
+Successful runs save the static site as a downloadable artifact for seven days.
+Production deployment is disabled while AWS hosting is being prepared.
+See [build and deployment status](docs/deployment.md).
 
 Run `bash tests/deploy.sh` to check deployment ordering and failure handling with
 a fake Docker CLI, without starting containers or accessing a database.
