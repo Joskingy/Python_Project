@@ -33,7 +33,8 @@ def test_broken_local_links_fail(tmp_path):
 
 def test_build_contains_only_publishable_pages_and_assets():
     output = builder.build()
-    assert len(list(output.rglob("*.html"))) == 5
+    assert len(list(output.rglob("*.html"))) == 6
+    assert (output / "projects/brewmaster.html").is_file()
     assert (output / "assets/portfolio.css").is_file()
     assert not list(output.rglob("*.pdf"))
     assert not list(output.rglob("*.py"))

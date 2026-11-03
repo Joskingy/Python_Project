@@ -15,12 +15,18 @@ The operator supplies an AWS profile, expected account, and selected regions. An
 - **Treat incomplete evidence honestly.** Reports distinguish partial reads from complete results, with contextual errors and meaningful exit codes.
 - **Separate reads from writes.** The deployment command submits an explicitly reviewed retry. Other operational commands are read-only.
 
-## Delivery and verification
+## Evidence and delivery
 
-The repository uses a uv lockfile, Ruff, and pytest. Its GitHub Actions configuration includes Linux and Windows tests, sensitive-information checks, and distribution smoke checks. These are repository capabilities, not a claim that every current workflow run is passing.
+The public repository contains the CLI implementation, command documentation, uv lockfile, and pytest checks. Its GitHub Actions configuration includes Linux and Windows tests, sensitive-information checks, and distribution smoke checks.
 
-## What this demonstrates
+[Read the command documentation](https://github.com/Joskingy/BotoToolkit#readme) and [inspect the CI workflow](https://github.com/Joskingy/BotoToolkit/blob/main/.github/workflows/ci.yml) for the implementation and verification approach. Workflow results are available in the repository.
 
-The project connects Python engineering to day-to-day operations: bounded investigation, careful output handling, explicit permissions, and useful failure behavior. The repository documents limits and future work, including CI authentication support that is not yet implemented.
+## Scope and limitations
 
-[Read the project documentation](https://github.com/Joskingy/BotoToolkit#readme) · [Inspect its CI workflow](https://github.com/Joskingy/BotoToolkit/blob/main/.github/workflows/ci.yml)
+The CLI focuses on Amplify Hosting operations in explicitly selected accounts and regions. Partial reads remain visible in the report. CI authentication support is documented as future work. This case study describes the tool's implemented behavior and repository checks.
+
+## Engineering lessons
+
+Account identity belongs at the beginning of an operations workflow. A useful report also needs to explain its scope and what could be read, so the operator can judge the evidence.
+
+Configuration comparisons can expose useful differences while withholding values. Keeping deployment retries behind an explicit review makes the transition from investigation to action visible. These decisions shape both the CLI interface and its failure behavior.
