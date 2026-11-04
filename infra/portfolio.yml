@@ -30,6 +30,11 @@ Parameters:
     Default: 658327ea-f89d-4fab-a63d-7e88639e58f6
     AllowedPattern: "[a-f0-9-]{36}"
     Description: Managed-CachingOptimized, resolved from AWS during preparation.
+  ResponseHeadersPolicyId:
+    Type: String
+    Default: 67f7725c-6f97-4210-82d7-5512b31e9d03
+    AllowedPattern: "[a-f0-9-]{36}"
+    Description: AWS-managed SecurityHeadersPolicy, supported by the Free plan.
   DeployPermissionsBoundaryArn:
     Type: String
     AllowedPattern: "arn:aws:iam::[0-9]{12}:policy/portfolio-bootstrap/[A-Za-z0-9+=,.@_-]+"
@@ -89,27 +94,6 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
-  BrowserHeaders:
-    Type: AWS::CloudFront::ResponseHeadersPolicy
-    Properties:
-      ResponseHeadersPolicyConfig:
-        Name: !Sub "${AWS::StackName}-headers"
-        SecurityHeadersConfig:
-          ContentSecurityPolicy:
-            ContentSecurityPolicy: "default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'none'"
-            Override: true
-          ContentTypeOptions:
-            Override: true
-          FrameOptions:
-            FrameOption: DENY
-            Override: true
-          ReferrerPolicy:
-            ReferrerPolicy: strict-origin-when-cross-origin
-            Override: true
-          StrictTransportSecurity:
-            AccessControlMaxAgeSec: 31536000
-            Override: true
-
   WebAcl:
     Type: AWS::WAFv2::WebACL
     Metadata:
@@ -144,7 +128,9 @@ Resources:
     Metadata:
       com.aws.cloudformation.Context:
         why: Serve static pages over HTTPS from a private S3 origin.
-        must: Begin disabled. Activate the Free plan before enabling delivery.
+        must:
+          - Begin disabled. Activate the Free plan before enabling delivery.
+          - Use AWS-managed response headers. Custom policies require Business or Premium.
     Properties:
       DistributionConfig:
         Comment: !Sub "${AWS::StackName} portfolio"
@@ -168,7 +154,7 @@ Resources:
           CachedMethods: [GET, HEAD]
           Compress: true
           CachePolicyId: !Ref CachePolicyId
-          ResponseHeadersPolicyId: !Ref BrowserHeaders
+          ResponseHeadersPolicyId: !Ref ResponseHeadersPolicyId
 
   SiteBucketPolicy:
     Type: AWS::S3::BucketPolicy

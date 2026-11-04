@@ -22,6 +22,9 @@ can incur charges. WAF can incur prorated charges before enrollment activates.
 Confirm the bootstrap cost before executing the change set. Keep the distribution
 disabled until the subscription is active. The Free plan omits access logging.
 
+The Free plan uses AWS-managed security headers and a CSP meta tag in each page.
+Custom CloudFront response-header policies require Business or Premium.
+
 ## One-time workflow access
 
 Local bootstrap uses the `default` profile in the verified account. The separate
