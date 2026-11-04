@@ -73,6 +73,12 @@ Resources:
 
   PlanRole:
     Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Prepare infrastructure changes for review.
+        must:
+          - Change-set reads require both the stack and change-set resource scopes.
+          - Keep execution permissions in the approval-gated apply role.
     Properties:
       Path: /portfolio-bootstrap/
       AssumeRolePolicyDocument:
@@ -114,7 +120,9 @@ Resources:
                     cloudformation:DescribeChangeSet,
                     cloudformation:DeleteChangeSet,
                   ]
-                Resource: !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:changeSet/portfolio-*/*"
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:stack/${PortfolioStackName}/*"
+                  - !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:changeSet/portfolio-*/*"
               - Effect: Allow
                 Action: pricingplanmanager:GetSubscription
                 Resource: "*"
