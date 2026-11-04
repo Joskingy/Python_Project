@@ -1,0 +1,253 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: One-time GitHub OIDC access for planning and approving the portfolio CloudFormation stack.
+Metadata:
+  AWSToolsMetrics:
+    AWSAgentToolkit: aws-cloudformation@2
+  com.aws.cloudformation.Context:
+    ref: ../docs/deployment.md
+    must: Bootstrap locally with profile default. Keep this stack outside the workflow's permissions.
+
+Parameters:
+  ExpectedAccountId:
+    Type: String
+    AllowedPattern: "[0-9]{12}"
+  GitHubRepository:
+    Type: String
+    Default: Joskingy/Python_Project
+    AllowedPattern: "[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"
+  PortfolioStackName:
+    Type: String
+    Default: oscar-portfolio
+    AllowedPattern: "[a-z][a-z0-9-]{0,39}"
+  ExistingGitHubProviderArn:
+    Type: String
+    Default: ""
+    AllowedPattern: "^$|arn:aws:iam::[0-9]{12}:oidc-provider/token.actions.githubusercontent.com"
+
+Rules:
+  TargetAccount:
+    Assertions:
+      - Assert: !Equals [!Ref AWS::AccountId, !Ref ExpectedAccountId]
+        AssertDescription: Use the verified default account.
+      - Assert: !Equals [!Ref AWS::Region, us-east-1]
+        AssertDescription: Use us-east-1 for portfolio infrastructure.
+
+Conditions:
+  CreateProvider: !Equals [!Ref ExistingGitHubProviderArn, ""]
+
+Resources:
+  GitHubProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateProvider
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: [sts.amazonaws.com]
+
+  DeployBoundary:
+    Type: AWS::IAM::ManagedPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Limit permissions on the publishing role created by the hosting stack.
+        must: Infrastructure apply cannot modify this boundary or the bootstrap roles.
+    Properties:
+      Path: /portfolio-bootstrap/
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${PortfolioStackName}-*"
+          - Effect: Allow
+            Action: s3:PutObject
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${PortfolioStackName}-*/*"
+          - Effect: Allow
+            Action: [cloudfront:CreateInvalidation, cloudfront:GetInvalidation]
+            Resource: !Sub "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/*"
+          - Effect: Allow
+            Action: pricingplanmanager:GetSubscription
+            Resource: "*"
+
+  PlanRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /portfolio-bootstrap/
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                !If [
+                  CreateProvider,
+                  !Ref GitHubProvider,
+                  !Ref ExistingGitHubProviderArn,
+                ]
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubRepository}:ref:refs/heads/main"
+      Policies:
+        - PolicyName: PlanPortfolio
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: cloudformation:CreateChangeSet
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:stack/${PortfolioStackName}/*"
+                  - !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:changeSet/portfolio-*/*"
+              - Effect: Allow
+                Action:
+                  [
+                    cloudformation:DescribeStacks,
+                    cloudformation:GetTemplateSummary,
+                  ]
+                Resource: !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:stack/${PortfolioStackName}/*"
+              - Effect: Allow
+                Action:
+                  [
+                    cloudformation:DescribeChangeSet,
+                    cloudformation:DeleteChangeSet,
+                  ]
+                Resource: !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:changeSet/portfolio-*/*"
+              - Effect: Allow
+                Action: pricingplanmanager:GetSubscription
+                Resource: "*"
+
+  ApplyRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Execute reviewed hosting changes only after GitHub environment approval.
+        must: Configure required reviewers and main-only branches on infrastructure-production.
+    Properties:
+      Path: /portfolio-bootstrap/
+      MaxSessionDuration: 7200
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                !If [
+                  CreateProvider,
+                  !Ref GitHubProvider,
+                  !Ref ExistingGitHubProviderArn,
+                ]
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubRepository}:environment:infrastructure-production"
+      Policies:
+        - PolicyName: ApplyPortfolio
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: cloudformation:ExecuteChangeSet
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:changeSet/portfolio-*/*"
+                  - !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:stack/${PortfolioStackName}/*"
+              - Effect: Allow
+                Action: cloudformation:DescribeStacks
+                Resource: !Sub "arn:${AWS::Partition}:cloudformation:us-east-1:${AWS::AccountId}:stack/${PortfolioStackName}/*"
+              - Effect: Allow
+                Action: s3:*
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${PortfolioStackName}-*"
+                  - !Sub "arn:${AWS::Partition}:s3:::${PortfolioStackName}-*/*"
+              # Generated CloudFront IDs are unknown before the initial stack creation.
+              - Effect: Allow
+                Action:
+                  - cloudfront:CreateDistribution
+                  - cloudfront:GetDistribution
+                  - cloudfront:GetDistributionConfig
+                  - cloudfront:UpdateDistribution
+                  - cloudfront:DeleteDistribution
+                  - cloudfront:CreateOriginAccessControl
+                  - cloudfront:GetOriginAccessControl
+                  - cloudfront:UpdateOriginAccessControl
+                  - cloudfront:DeleteOriginAccessControl
+                  - cloudfront:CreateResponseHeadersPolicy
+                  - cloudfront:GetResponseHeadersPolicy
+                  - cloudfront:UpdateResponseHeadersPolicy
+                  - cloudfront:DeleteResponseHeadersPolicy
+                  - cloudfront:ListTagsForResource
+                  - cloudfront:ListDistributions
+                  - cloudfront:ListOriginAccessControls
+                  - cloudfront:ListResponseHeadersPolicies
+                  - cloudfront:TagResource
+                  - cloudfront:UntagResource
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  [
+                    wafv2:CreateWebACL,
+                    wafv2:GetWebACL,
+                    wafv2:UpdateWebACL,
+                    wafv2:DeleteWebACL,
+                    wafv2:ListTagsForResource,
+                    wafv2:TagResource,
+                    wafv2:UntagResource,
+                  ]
+                Resource: !Sub "arn:${AWS::Partition}:wafv2:us-east-1:${AWS::AccountId}:global/webacl/*/*"
+              - Effect: Allow
+                Action:
+                  [
+                    pricingplanmanager:CreateSubscription,
+                    pricingplanmanager:GetSubscription,
+                    pricingplanmanager:UpdateSubscription,
+                    pricingplanmanager:CancelSubscription,
+                    pricingplanmanager:CancelSubscriptionChange,
+                    pricingplanmanager:ListSubscriptions,
+                    pricingplanmanager:AssociateResourcesToSubscription,
+                    pricingplanmanager:DisassociateResourcesFromSubscription,
+                    cloudwatch:GetMetricData,
+                    shield:ListProtections,
+                    freetier:GetAccountPlanState,
+                  ]
+                Resource: "*"
+              - Effect: Allow
+                Action: [iam:CreateRole, iam:PutRolePermissionsBoundary]
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/portfolio/*"
+                Condition:
+                  ArnEquals:
+                    iam:PermissionsBoundary: !Ref DeployBoundary
+              - Effect: Allow
+                Action:
+                  [
+                    iam:GetRole,
+                    iam:DeleteRole,
+                    iam:UpdateAssumeRolePolicy,
+                    iam:UpdateRole,
+                    iam:UpdateRoleDescription,
+                    iam:PutRolePolicy,
+                    iam:GetRolePolicy,
+                    iam:DeleteRolePolicy,
+                    iam:ListRolePolicies,
+                    iam:ListAttachedRolePolicies,
+                    iam:TagRole,
+                    iam:UntagRole,
+                  ]
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/portfolio/*"
+
+Outputs:
+  PlanRoleArn:
+    Description: Repository secret AWS_INFRA_PLAN_ROLE_ARN.
+    Value: !GetAtt PlanRole.Arn
+  ApplyRoleArn:
+    Description: Environment secret AWS_INFRA_APPLY_ROLE_ARN on infrastructure-production.
+    Value: !GetAtt ApplyRole.Arn
+  GitHubProviderArn:
+    Description: Repository secret AWS_GITHUB_PROVIDER_ARN.
+    Value:
+      !If [CreateProvider, !Ref GitHubProvider, !Ref ExistingGitHubProviderArn]
+  DeployBoundaryArn:
+    Description: Repository secret AWS_DEPLOY_BOUNDARY_ARN.
+    Value: !Ref DeployBoundary
