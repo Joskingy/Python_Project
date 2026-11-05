@@ -320,16 +320,23 @@
     border-color: var(--accent);
   }
   .project-emblem {
-    height: 144px;
-    display: grid;
-    place-items: center;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
     background: var(--surface-raised);
-    color: var(--muted);
     border-bottom: 1px solid var(--line);
   }
-  .project-emblem svg {
-    width: 240px;
-    height: 100px;
+  .project-emblem img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .project-emblem .project-cover-coffee {
+    object-position: center 70%;
   }
   .project-card-body {
     padding: 26px;
@@ -790,9 +797,6 @@
     }
     .project-card-body {
       padding: 24px;
-    }
-    .project-emblem {
-      height: 125px;
     }
     .note-row h3 {
       font-size: 20px;
