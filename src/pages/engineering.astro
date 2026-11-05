@@ -1,0 +1,82 @@
+---
+import Portfolio from "../layouts/Portfolio.astro";
+---
+
+<Portfolio
+  title="How this site ships"
+  description="Static Astro pages, a Starlight handbook, and reviewed delivery to private S3 and CloudFront."
+>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a><span aria-hidden="true">/</span><span>Engineering</span
+    >
+  </nav>
+  <div class="case-hero">
+    <h1 data-pagefind-meta="title">
+      A small site.<br />A considered release.
+    </h1><p class="lead">
+      Static pages, a useful handbook, and a delivery process that keeps content
+      and infrastructure changes clear.
+    </p>
+  </div>
+  <article class="article markdown engineering-article">
+    <h2 id="architecture">Clear responsibilities</h2>
+    <p>
+      Astro builds the portfolio from typed project content. Starlight provides
+      handbook navigation and code presentation. One Pagefind index searches
+      both. The browser loads static files, locally hosted fonts, and small
+      scripts for search and the homepage stars.
+    </p>
+    <ol class="delivery-steps">
+      <li>Markdown and profile data</li><li>Checked Astro build</li><li>
+        Saved release artifact
+      </li><li>Private S3 and CloudFront</li>
+    </ol>
+    <h2 id="delivery">Build once, publish the tested artifact</h2>
+    <p>
+      Changes on dev and pull requests are checked before merging to protected
+      main. The workflow validates content, types, and generated links, then
+      saves the site artifact. The publishing job downloads that artifact,
+      assumes a scoped AWS role through GitHub OIDC, and checks the active
+      CloudFront Free subscription before uploading.
+    </p>
+    <p>
+      Assets are uploaded before pages. CloudFront is invalidated, then public
+      pages and search assets are checked. Previous objects remain available for
+      cached pages, and S3 versioning provides a recovery path.
+    </p>
+    <h2 id="infrastructure">Review infrastructure separately</h2>
+    <p>
+      The hosting stack is deployed on private S3 and CloudFront with HTTPS and
+      Origin Access Control. A separate manual workflow prepares a
+      CloudFormation change set. Infrastructure application waits for approval
+      of that exact proposal.
+    </p>
+    <p>
+      The Free-only constraint stays in the template and delivery checks. A
+      custom domain is a separate future decision.
+    </p>
+    <h2 id="history">Keep the learning visible</h2>
+    <p>
+      This project began as Flask and PostgreSQL, then used a Python and Jinja
+      static build managed with uv. The portfolio now uses Astro and Starlight.
+      The original Flask application and its data remain separate from the
+      public static site.
+    </p>
+    <h2 id="evidence">Inspect the implementation</h2>
+    <ul>
+      <li>
+        <a href="https://github.com/Joskingy/Python_Project"
+          >Project repository</a
+        >
+      </li><li>
+        <a href="/handbook/aws/github-actions-oidc.html"
+          >Workflow identity and AWS permissions</a
+        >
+      </li><li>
+        <a href="/handbook/iac/change-set-review.html"
+          >Infrastructure change-set review</a
+        >
+      </li>
+    </ul>
+  </article>
+</Portfolio>

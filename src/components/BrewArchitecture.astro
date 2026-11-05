@@ -1,0 +1,96 @@
+<figure class="brew-architecture">
+  <h3>From commit to an environment-aware build</h3>
+  <ol>
+    <li>
+      <strong>Validate the change</strong><span
+        >GitHub Actions checks and frontend build</span
+      >
+    </li>
+    <li>
+      <strong>Deploy the backend</strong><span
+        >Assume an AWS role through OIDC and deploy Amplify Gen 2</span
+      >
+    </li>
+    <li>
+      <strong>Generate environment outputs</strong><span
+        >Build the frontend against the selected backend configuration</span
+      >
+    </li>
+    <li>
+      <strong>Trigger hosting</strong><span
+        >An environment-specific webhook starts Amplify Hosting</span
+      >
+    </li>
+  </ol>
+  <h3>Application services</h3>
+  <dl>
+    <div>
+      <dt>React + Amplify Hosting</dt><dd>Recipe discovery and publishing</dd>
+    </div>
+    <div>
+      <dt>Cognito</dt><dd>Signed-in users and identity-pool guest reads</dd>
+    </div>
+    <div>
+      <dt>AppSync + DynamoDB</dt><dd>Recipe API with data authorization</dd>
+    </div>
+    <div>
+      <dt>Amplify Storage</dt><dd>
+        Recipe images in the development implementation
+      </dd>
+    </div>
+  </dl>
+  <figcaption>
+    Simplified view of the reviewed development branch. Development and main
+    have different implementations.
+  </figcaption>
+</figure>
+<style>
+  figure {
+    margin-block: 28px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  ol {
+    padding-left: 22px;
+  }
+  li {
+    padding: 10px 0;
+  }
+  strong,
+  dt {
+    color: var(--text);
+    font-weight: 600;
+  }
+  span {
+    display: block;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  dt {
+    font-size: 14px;
+  }
+  dd {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  figcaption {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  @media (max-width: 760px) {
+    dl {
+      grid-template-columns: 1fr;
+    }
+    figure {
+      padding: 18px;
+    }
+  }
+</style>

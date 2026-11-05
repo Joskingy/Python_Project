@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>GitHub Actions to AWS · Design preview</title>
+    <link rel="icon" href="data:," />
+    <link
+      rel="preload"
+      href="fonts/space-grotesk-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="fonts/dela-gothic-one-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="design.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="preview-note">
+      Design review · Mono-inspired black portfolio
+    </div>
+    <header class="header shell">
+      <a class="brand" href="index.html">Oscar Valdes</a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html#work">Work</a
+        ><a href="handbook.html" aria-current="page">Handbook</a
+        ><a href="index.html#about">About</a
+        ><a href="index.html#contact">Contact</a
+        ><button
+          class="search-trigger"
+          data-search
+          hidden
+          aria-haspopup="dialog"
+        >
+          Search <kbd>Ctrl K</kbd>
+        </button>
+      </nav>
+    </header>
+    <main id="main" class="shell docs-layout" tabindex="-1">
+      <details class="topics" open>
+        <summary>Engineering handbook</summary>
+        <nav aria-label="Handbook topics">
+          <div class="topic-group">
+            <strong>AWS & delivery</strong
+            ><a href="handbook.html" aria-current="page"
+              >GitHub Actions to AWS</a
+            >
+          </div>
+          <div class="topic-group">
+            <strong>Infrastructure as code</strong><span>Change-set review</span
+            ><small>Planned article</small>
+          </div>
+          <div class="topic-group">
+            <strong>Kubernetes</strong><span>Investigating failed rollouts</span
+            ><small>Planned article</small>
+          </div>
+          <div class="topic-group">
+            <strong>Python</strong><span>Building deliberate CLI tools</span
+            ><small>Planned article</small>
+          </div>
+          <div class="topic-group">
+            <a href="case-study.html">Explore BotoToolkit</a>
+          </div>
+        </nav>
+      </details>
+      <article class="docs-article">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="index.html">Home</a><span aria-hidden="true">/</span
+          ><span>Handbook</span><span aria-hidden="true">/</span
+          ><span>AWS</span>
+        </nav>
+        <h1>GitHub Actions to AWS, without stored keys.</h1>
+        <p class="lead">
+          Make workflow identity specific, deployment permissions narrow, and
+          infrastructure changes reviewable.
+        </p>
+        <div class="reading-meta">
+          <span>From this portfolio’s delivery setup</span
+          ><span>Draft for design review</span>
+        </div>
+        <details class="mobile-contents">
+          <summary>On this page</summary>
+          <a href="#context">The context</a
+          ><a href="#identity">Establish identity</a
+          ><a href="#permissions">Separate permissions</a
+          ><a href="#verify">Verify the boundaries</a
+          ><a href="#sources">Implementation & sources</a>
+        </details>
+        <div class="article">
+          <aside class="callout">
+            <strong>The practice</strong>
+            <p>
+              Use a short-lived AWS role session for each authorized workflow.
+              Scope who can assume the role separately from what that role may
+              do.
+            </p>
+          </aside>
+          <section id="context">
+            <h2>The context</h2>
+            <p>
+              This portfolio publishes static files to a private S3 bucket
+              behind CloudFront. Content updates and infrastructure changes have
+              different consequences, so they follow different paths through
+              GitHub Actions.
+            </p>
+            <div class="delivery-path" aria-label="Delivery identity sequence">
+              <span>GitHub workflow</span><i aria-hidden="true">→</i
+              ><span>OIDC token</span><i aria-hidden="true">→</i
+              ><span>AWS role session</span>
+            </div>
+            <p>
+              GitHub’s OIDC token lets AWS verify the workflow’s identity. The
+              role’s trust policy defines which identities may assume it. The
+              role’s permissions define what the resulting session can access.
+            </p>
+          </section>
+          <section id="identity">
+            <h2>Be precise about workflow identity</h2>
+            <p>
+              For the publisher, the trust condition names this repository and
+              its protected <code translate="no">production</code> environment.
+              The environment’s deployment branch policy restricts releases to
+              <code translate="no">main</code>.
+            </p>
+            <figure class="code">
+              <figcaption>
+                Trust-policy condition excerpt · Illustrative JSON
+              </figcaption>
+              <pre
+                tabindex="0"
+                aria-label="Trust-policy condition example"
+              ><code translate="no">{
+  <span class="code-key">"StringEquals"</span>: {
+    <span class="code-key">"token.actions.githubusercontent.com:aud"</span>:
+      <span class="code-value">"sts.amazonaws.com"</span>,
+    <span class="code-key">"token.actions.githubusercontent.com:sub"</span>:
+      <span class="code-value">"repo:Joskingy/Python_Project:environment:production"</span>
+  }
+}</code></pre>
+            </figure>
+            <p>
+              This excerpt is only the condition, not a complete role. The
+              deployed template also defines the federated provider, allowed
+              assume-role action, and the publisher’s permissions boundary.
+            </p>
+            <aside class="callout">
+              <strong
+                >Environment trust and branch restrictions work
+                together.</strong
+              >
+              <p>
+                An environment-based subject identifies the environment. The
+                main-only deployment rule belongs to GitHub’s environment
+                protection settings.
+              </p>
+            </aside>
+          </section>
+          <section id="permissions">
+            <h2>Separate routine delivery from infrastructure</h2>
+            <p>
+              The publishing role uploads site files and requests CloudFront
+              invalidation. Infrastructure planning and application use separate
+              roles and a manual workflow with change-set review and environment
+              approval.
+            </p>
+            <ul>
+              <li>
+                <strong>Publishing</strong> consumes the tested site artifact.
+              </li>
+              <li>
+                <strong>Planning</strong> prepares an infrastructure change set
+                for inspection.
+              </li>
+              <li>
+                <strong>Applying</strong> executes the reviewed change set after
+                approval.
+              </li>
+            </ul>
+            <p>
+              OIDC removes the need for stored AWS access keys in the workflow.
+              It does not replace least-privilege permissions, protected
+              environments, or review of the code being executed.
+            </p>
+          </section>
+          <section id="verify">
+            <h2>Verify the boundaries</h2>
+            <ol>
+              <li>
+                Inspect the role’s trust policy and confirm the repository,
+                audience, and environment match the intended workflow.
+              </li>
+              <li>
+                Check that the production environment limits deployment to main,
+                and that infrastructure application requires approval.
+              </li>
+              <li>
+                Review publishing permissions against the actual site bucket and
+                distribution.
+              </li>
+              <li>
+                Inspect the change-set summary before applying infrastructure
+                changes.
+              </li>
+              <li>
+                After publication, check the public pages, assets, and HTTPS
+                response.
+              </li>
+            </ol>
+            <p>
+              These are review steps for this setup. A separate test environment
+              is the right place to exercise denied-access scenarios without
+              interrupting publishing.
+            </p>
+          </section>
+          <section id="sources">
+            <h2>Implementation & sources</h2>
+            <p>
+              The implementation links below are the source of truth for this
+              portfolio. This article is an initial content draft for the design
+              prototype.
+            </p>
+            <ul>
+              <li>
+                <a
+                  href="https://github.com/Joskingy/Python_Project/blob/main/infra/portfolio.yml"
+                  >Hosting and publishing role template</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Joskingy/Python_Project/blob/main/.github/workflows/infrastructure.yml"
+                  >Infrastructure review workflow</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws"
+                  >GitHub’s guidance for OIDC with AWS</a
+                >
+              </li>
+            </ul>
+            <a class="related" href="case-study.html"
+              >Continue with BotoToolkit<span
+                >A related identity-first approach in a local Python operations
+                tool.</span
+              ></a
+            >
+          </section>
+        </div>
+      </article>
+      <nav class="outline" aria-label="On this page">
+        <strong>On this page</strong><a href="#context">The context</a
+        ><a href="#identity">Establish identity</a
+        ><a href="#permissions">Separate permissions</a
+        ><a href="#verify">Verify the boundaries</a
+        ><a href="#sources">Implementation & sources</a>
+      </nav>
+    </main>
+    <footer class="footer shell" id="contact">
+      <div>
+        <h2>Let’s build something dependable.</h2>
+        <p>Oscar Valdes · Monterrey, Mexico</p>
+      </div>
+      <div class="footer-links">
+        <a href="mailto:odyva@hotmail.com">Email Oscar</a
+        ><a href="https://github.com/Joskingy">GitHub</a
+        ><a
+          href="https://www.linkedin.com/in/oscar-vald%C3%A9s-arrambide-028571101/"
+          >LinkedIn</a
+        >
+      </div>
+    </footer>
+    <script src="design.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,130 @@
+<button
+  class="search-trigger"
+  data-search-open
+  hidden
+  aria-haspopup="dialog"
+  aria-controls="site-search"
+>
+  Search <kbd aria-hidden="true">Ctrl K</kbd>
+</button>
+<dialog id="site-search" aria-labelledby="search-title" data-pagefind-ignore>
+  <div class="search-heading">
+    <h2 id="search-title">Search the site</h2>
+    <button type="button" data-search-close>Close</button>
+  </div>
+  <label for="site-search-input">Projects and handbook articles</label>
+  <input
+    id="site-search-input"
+    name="q"
+    type="search"
+    placeholder="Try AWS, Python, or rollback…"
+    autocomplete="off"
+    spellcheck="false"
+  />
+  <p role="status" data-search-status>Enter a word or phrase to search.</p>
+  <ul data-search-results></ul>
+</dialog>
+<script>
+  import "../scripts/search";
+</script>
+<style>
+  .search-trigger {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 8px 14px;
+    border-radius: 24px;
+    font-size: 12px;
+  }
+  .search-trigger:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  dialog {
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid #555;
+    border-radius: 6px;
+    width: min(620px, calc(100% - 32px));
+    max-height: 85svh;
+    padding: 26px;
+    overscroll-behavior: contain;
+  }
+  dialog::backdrop {
+    background: #000d;
+  }
+  .search-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 20px;
+  }
+  h2 {
+    font: 400 24px/1.4 var(--font-heading);
+    margin: 0;
+  }
+  [data-search-close] {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    min-height: 44px;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  input {
+    width: 100%;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 12px 14px;
+    min-height: 48px;
+  }
+  p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 0;
+  }
+  ul :global(a) {
+    display: block;
+    padding: 16px 0;
+    text-decoration: none;
+    border-top: 1px solid var(--line);
+    font-size: 16px;
+    color: var(--text);
+  }
+  ul :global(a:hover) {
+    text-decoration: underline;
+  }
+  ul :global(span) {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  @media (max-width: 760px) {
+    .search-trigger {
+      border: 0;
+      padding-inline: 0;
+    }
+    kbd {
+      display: none;
+    }
+  }
+</style>
