@@ -42,11 +42,13 @@
     "certifications": [
       {
         "name": "AWS Certified Solutions Architect – Associate",
-        "date": "Earned December 2024"
+        "date": "Earned December 2024",
+        "badge": "/certifications/aws-solutions-architect-associate.png"
       },
       {
         "name": "AWS Certified Cloud Practitioner",
-        "date": "Earned September 2024"
+        "date": "Earned September 2024",
+        "badge": "/certifications/aws-cloud-practitioner.png"
       }
     ],
     "education": "Bachelor of Software Engineering · Universidad Regiomontana · 2015"

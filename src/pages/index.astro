@@ -15,12 +15,17 @@ const projects = (await getCollection("projects")).sort(
 >
   <section class="hero" aria-labelledby="intro-title">
     <div class="hero-identity">
-      <div class="identity-mark" aria-hidden="true">ov</div>
+      <img
+        class="identity-mark"
+        src="/github-avatar.png"
+        alt={`${profile.name}'s GitHub profile picture`}
+        width="144"
+        height="144"
+        fetchpriority="high"
+      />
       <h1 id="intro-title" data-pagefind-meta="title">{profile.name}</h1>
       <p class="role">DevOps Engineer / SRE / Platform Engineer</p>
-      <p class="intro">
-        AWS architecture · Python automation · {profile.location}
-      </p>
+      <p class="intro">{profile.location}</p>
       <nav
         class="hero-socials"
         aria-label="Connect with Oscar"
@@ -153,20 +158,31 @@ const projects = (await getCollection("projects")).sort(
         delivery. Today, my independent work focuses on practical Python tooling
         and Kubernetes operations.
       </p>
-      <div class="credentials">
-        <h3>Credentials</h3>
-        <ul>
+      <section class="credentials" aria-labelledby="credentials-title">
+        <h3 id="credentials-title">Credentials</h3>
+        <ul role="list" aria-label="AWS certifications">
           {
             profile.certifications.map((certification) => (
               <li>
-                {certification.name}
-                <small>{certification.date}</small>
+                <img
+                  class="certification-badge"
+                  src={certification.badge}
+                  alt=""
+                  width="96"
+                  height="96"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <strong class="certification-name">{certification.name}</strong>
+                  <small>{certification.date}</small>
+                </div>
               </li>
             ))
           }
         </ul>
-        <p>{profile.education}</p>
-      </div>
+        <p class="credentials-education">{profile.education}</p>
+      </section>
     </div>
     <div class="career" id="experience">
       {

@@ -36,7 +36,7 @@ export const collections = {
       experience: z.array(
         z.object({ company: text, role: text, dates: text, description: text }),
       ),
-      certifications: z.array(z.object({ name: text, date: text })),
+      certifications: z.array(z.object({ name: text, date: text, badge: text })),
       education: text,
     }),
   }),
