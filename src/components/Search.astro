@@ -4,8 +4,13 @@
   hidden
   aria-haspopup="dialog"
   aria-controls="site-search"
+  aria-label="Search the site"
 >
-  Search <kbd aria-hidden="true">Ctrl K</kbd>
+  <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+    <circle cx="10.5" cy="10.5" r="6.5" />
+    <path d="m16 16 4 4" />
+  </svg>
+  <span class="search-label">Search</span> <kbd aria-hidden="true">Ctrl K</kbd>
 </button>
 <dialog id="site-search" aria-labelledby="search-title" data-pagefind-ignore>
   <div class="search-heading">
@@ -44,10 +49,13 @@
     color: var(--text);
     border-color: var(--accent);
   }
+  .search-icon {
+    display: block;
+  }
   dialog {
     color: var(--text);
     background: var(--bg);
-    border: 1px solid #555;
+    border: 1px solid var(--border-strong);
     border-radius: 6px;
     width: min(620px, calc(100% - 32px));
     max-height: 85svh;
@@ -86,7 +94,7 @@
     width: 100%;
     background: var(--surface);
     color: var(--text);
-    border: 1px solid #555;
+    border: 1px solid var(--border-strong);
     border-radius: 3px;
     padding: 12px 14px;
     min-height: 48px;
@@ -118,12 +126,18 @@
     color: var(--muted);
     margin-top: 4px;
   }
-  @media (max-width: 760px) {
+  @media (max-width: 49.999rem) {
     .search-trigger {
       border: 0;
-      padding-inline: 0;
+      padding: 0;
+      width: 44px;
+      justify-content: center;
     }
-    kbd {
+    .search-icon {
+      display: block;
+    }
+    kbd,
+    .search-label {
       display: none;
     }
   }

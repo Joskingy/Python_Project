@@ -4,24 +4,24 @@
   --sl-font: var(--font-body);
   --sl-font-system: var(--font-body);
   --sl-font-mono: Consolas, monospace;
-  --sl-color-white: #f1f1f1;
-  --sl-color-gray-1: #e5e5e5;
-  --sl-color-gray-2: #aaa;
+  --sl-color-white: var(--text);
+  --sl-color-gray-1: var(--accent);
+  --sl-color-gray-2: var(--muted);
   --sl-color-gray-3: #999;
-  --sl-color-gray-4: #555;
-  --sl-color-gray-5: #282828;
-  --sl-color-gray-6: #0b0b0b;
-  --sl-color-black: #000;
-  --sl-color-accent-low: #161616;
-  --sl-color-accent: #e5e5e5;
-  --sl-color-accent-high: #f1f1f1;
-  --sl-color-bg: #000;
-  --sl-color-bg-nav: #000;
-  --sl-color-bg-sidebar: #000;
-  --sl-color-text-invert: #000;
+  --sl-color-gray-4: var(--border-strong);
+  --sl-color-gray-5: var(--line);
+  --sl-color-gray-6: var(--surface);
+  --sl-color-black: var(--bg);
+  --sl-color-accent-low: var(--surface-raised);
+  --sl-color-accent: var(--accent);
+  --sl-color-accent-high: var(--text);
+  --sl-color-bg: var(--bg);
+  --sl-color-bg-nav: var(--bg);
+  --sl-color-bg-sidebar: var(--bg);
+  --sl-color-text-invert: var(--bg);
   --sl-content-width: 45rem;
   --sl-sidebar-width: 17rem;
-  --sl-nav-height: 5rem;
+  --sl-nav-height: var(--site-header-height);
   --sl-text-h1: clamp(1.875rem, 2.6vw, 2rem);
   --sl-text-h2: 1.65rem;
 }
@@ -77,10 +77,8 @@ starlight-toc a {
 .sl-markdown-content pre {
   max-width: 100%;
 }
-@media (max-width: 760px) {
-  :root,
-  :root[data-theme="light"],
-  :root[data-theme="dark"] {
-    --sl-nav-height: 7.5rem;
-  }
+.page > .header {
+  padding: 0;
+  border-bottom: 0;
+  background: transparent;
 }

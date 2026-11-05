@@ -1,8 +1,8 @@
 # Oscar Valdes · Portfolio
 
 A static Astro portfolio and Starlight engineering handbook for DevOps, SRE,
-and Platform Engineering. Black and grayscale, locally hosted Mono-inspired
-fonts, and a lightweight interactive starfield.
+and Platform Engineering. Black by default with an optional dark blue theme,
+locally hosted Mono-inspired fonts, and a lightweight interactive starfield.
 
 ## Run locally
 

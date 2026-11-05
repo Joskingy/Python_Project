@@ -1,4 +1,9 @@
 .portfolio {
+  .portfolio-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
   .credentials {
     margin-top: 32px;
   }
@@ -176,7 +181,7 @@
     padding: 12px 20px;
     background: var(--text);
     color: var(--bg);
-    z-index: 20;
+    z-index: 50;
     transform: translateY(-160%);
   }
   .skip:focus {
@@ -217,7 +222,7 @@
   .identity-mark {
     width: 144px;
     height: 144px;
-    border: 1px solid #555555;
+    border: 1px solid var(--border-strong);
     border-radius: 50%;
     display: block;
     object-fit: cover;
@@ -307,7 +312,7 @@
   }
   .project-card {
     border: 1px solid var(--line);
-    background: #080808;
+    background: var(--surface-card);
     border-radius: 3px;
     overflow: hidden;
   }
@@ -318,8 +323,8 @@
     height: 144px;
     display: grid;
     place-items: center;
-    background: #111111;
-    color: #aaaaaa;
+    background: var(--surface-raised);
+    color: var(--muted);
     border-bottom: 1px solid var(--line);
   }
   .project-emblem svg {
@@ -333,11 +338,11 @@
     color: var(--muted);
     font-size: 12px;
   }
-  .project-card h3 {
+  .project-card :is(h2, h3) {
     margin-block: 8px 14px;
     font-size: 20px;
   }
-  .project-card h3 a {
+  .project-card :is(h2, h3) a {
     text-decoration: none;
   }
   .project-card-body > p {
@@ -611,7 +616,7 @@
     width: 25px;
     height: 25px;
     flex: 0 0 25px;
-    border: 1px solid #555555;
+    border: 1px solid var(--border-strong);
     display: grid;
     place-items: center;
     font-size: 11px;
@@ -643,7 +648,7 @@
     display: block;
     padding: 22px 25px;
     border: 1px solid var(--line);
-    background: #080808;
+    background: var(--surface-card);
     text-decoration: none;
     margin-top: 22px;
     font-size: 16px;
@@ -685,7 +690,7 @@
       12px/1.9 Consolas,
       monospace;
     tab-size: 2;
-    background: #070707;
+    background: var(--surface);
   }
   code {
     font-family: Consolas, monospace;
@@ -700,7 +705,7 @@
     color: var(--accent);
   }
   .code-value {
-    color: #dddddd;
+    color: var(--text);
   }
   .delivery-path {
     display: flex;
