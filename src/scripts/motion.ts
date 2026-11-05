@@ -9,7 +9,7 @@ function initializeStarfield() {
   )!;
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const mousePointer = matchMedia("(hover: hover) and (pointer: fine)");
-  const stars = new Float32Array(1000 * 3);
+  const stars = new Float32Array(1600 * 3);
   for (let index = 0; index < stars.length; index++) {
     stars[index] = (Math.random() - 0.5) * 10;
   }
@@ -28,7 +28,7 @@ function initializeStarfield() {
   function draw() {
     context.clearRect(0, 0, width, height);
     context.fillStyle = "#ffffff";
-    context.globalAlpha = 0.32;
+    context.globalAlpha = 0.35;
     const focalLength = height / (2 * Math.tan((75 * Math.PI) / 360));
     const spinCos = Math.cos(rotation);
     const spinSin = Math.sin(rotation);
@@ -47,7 +47,7 @@ function initializeStarfield() {
       const rotatedX = x * spinCos + z * spinSin;
       const rotatedZ = -x * spinSin + z * spinCos;
       const rotatedY = y * tiltCos - rotatedZ * tiltSin;
-      const cameraZ = y * tiltSin + rotatedZ * tiltCos - 6;
+      const cameraZ = y * tiltSin + rotatedZ * tiltCos - 5;
       const viewX = rotatedX * yawCos + cameraZ * yawSin;
       const viewZ = -rotatedX * yawSin + cameraZ * yawCos;
       const viewY = rotatedY * pitchCos - viewZ * pitchSin;
@@ -63,7 +63,8 @@ function initializeStarfield() {
         screenY > height + 2
       )
         continue;
-      const radius = Math.min(1.2, Math.max(0.35, 2.2 / depth));
+      // Match the reference's perspective sizing at different viewport heights.
+      const radius = Math.min(1.5, Math.max(0.3, (height * 0.00375) / depth));
       context.beginPath();
       context.arc(screenX, screenY, radius, 0, Math.PI * 2);
       context.fill();
@@ -84,7 +85,7 @@ function initializeStarfield() {
     const delta =
       previousTime === null ? 0 : Math.min((time - previousTime) / 1000, 0.05);
     previousTime = time;
-    const easing = 1 - Math.exp(-delta * 4);
+    const easing = 1 - Math.exp(-delta * 10);
     yaw += (targetYaw - yaw) * easing;
     pitch += (targetPitch - pitch) * easing;
     rotation += delta * 0.022;
@@ -99,8 +100,8 @@ function initializeStarfield() {
 
   function movePointer(event: PointerEvent) {
     if (event.pointerType !== "mouse") return;
-    targetYaw = (event.clientX / width - 0.5) * 0.11;
-    targetPitch = (0.5 - event.clientY / height) * 0.09;
+    targetYaw = (0.5 - event.clientX / width) * 0.2;
+    targetPitch = (event.clientY / height - 0.5) * 0.2;
   }
 
   function updateMotion() {

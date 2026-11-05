@@ -20,9 +20,9 @@ const handbook = Astro.url.pathname.startsWith("/handbook");
 </div>
 <style>
   .site-header {
-    width: min(1040px, calc(100% - 2 * var(--gutter)));
+    width: min(var(--portfolio-width), calc(100% - 2 * var(--gutter)));
     margin-inline: auto;
-    min-height: 76px;
+    min-height: var(--site-header-height);
     display: flex;
     align-items: center;
     justify-content: space-between;

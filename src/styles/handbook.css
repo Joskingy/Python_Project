@@ -22,16 +22,21 @@
   --sl-content-width: 45rem;
   --sl-sidebar-width: 17rem;
   --sl-nav-height: 5rem;
-  --sl-text-h1: clamp(1.9rem, 2.6vw, 2.4rem);
+  --sl-text-h1: clamp(1.875rem, 2.6vw, 2rem);
   --sl-text-h2: 1.65rem;
 }
-h1,
-.sl-markdown-content :is(h2, h3, h4) {
+h1 {
   font-family: var(--font-heading);
   font-weight: 400;
   font-synthesis: none;
   line-height: 1.4;
   letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.sl-markdown-content :is(h2, h3, h4) {
+  font-family: var(--font-body);
+  font-weight: 600;
+  line-height: 1.4;
   text-wrap: balance;
 }
 .sl-markdown-content {

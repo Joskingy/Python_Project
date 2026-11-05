@@ -21,6 +21,8 @@
   --muted: #aaaaaa;
   --accent: #e5e5e5;
   --shell: 1180px;
+  --portfolio-width: 720px;
+  --site-header-height: 56px;
   --gutter: 40px;
   --font-body: "Space Grotesk", system-ui, sans-serif;
   --font-heading: "Dela Gothic One", "Arial Black", sans-serif;
@@ -82,6 +84,7 @@ summary {
 @media (max-width: 760px) {
   :root {
     --gutter: 22px;
+    --site-header-height: 114px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -17,7 +17,7 @@ const profile = (await getEntry("profile", "oscar"))!.data;
 </footer>
 <style>
   .site-footer {
-    width: min(1040px, calc(100% - 2 * var(--gutter)));
+    width: min(var(--portfolio-width), calc(100% - 2 * var(--gutter)));
     margin-inline: auto;
     padding-block: 32px;
     border-top: 1px solid var(--line);
@@ -26,8 +26,8 @@ const profile = (await getEntry("profile", "oscar"))!.data;
     gap: 28px;
     align-items: center;
   }
-  h2 {
-    font: 400 19px/1.4 var(--font-heading);
+  .site-footer h2 {
+    font: 600 19px/1.4 var(--font-body);
     margin: 0;
     color: var(--text);
   }
