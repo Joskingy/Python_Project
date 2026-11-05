@@ -26,22 +26,34 @@ jobs:
         with:
           version: "0.12.13"
 
-      - name: Install locked dependencies
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install locked website dependencies
+        run: npm ci
+
+      - name: Check content and types
+        run: npm run check
+
+      - name: Build and validate the static site
+        run: npm run build
+
+      - name: Install locked Python tools
         run: uv sync --locked
 
-      - name: Lint portfolio code
+      - name: Check the managed preview
         run: |
-          uv run --locked ruff check scripts/build.py scripts/serve.py tests/test_build.py tests/test_serve.py
-          uv run --locked ruff format --check scripts/build.py scripts/serve.py tests/test_build.py tests/test_serve.py
+          uv run --locked ruff check scripts/serve.py tests/test_serve.py
+          uv run --locked ruff format --check scripts/serve.py tests/test_serve.py
 
       - name: Run tests
         run: uv run --locked pytest -q
 
       - name: Validate hosting infrastructure
         run: uv tool run --from cfn-lint==1.59.0 cfn-lint infra/portfolio.yml infra/infrastructure-access.yml
-
-      - name: Build static portfolio and check links
-        run: uv run --locked python scripts/build.py
 
       - name: Save site artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -92,6 +104,8 @@ jobs:
           test -f site/index.html
           test -f site/projects/bototoolkit.html
           test -f site/projects/brewmaster.html
+          test -f site/handbook/aws/github-actions-oidc.html
+          test -f site/pagefind/pagefind.js
 
       - name: Authenticate to AWS
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
@@ -119,7 +133,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          aws s3 sync site/assets/ "s3://${AWS_SITE_BUCKET}/assets/" \
+          aws s3 sync site/_astro/ "s3://${AWS_SITE_BUCKET}/_astro/" \
+            --cache-control 'public,max-age=31536000,immutable' --only-show-errors
+          aws s3 sync site/ "s3://${AWS_SITE_BUCKET}/" \
+            --exclude '*.html' --exclude '_astro/*' \
             --cache-control 'public,max-age=300' --only-show-errors
           aws s3 sync site/ "s3://${AWS_SITE_BUCKET}/" \
             --exclude '*' --include '*.html' \
@@ -139,7 +156,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for page in index.html projects/bototoolkit.html projects/brewmaster.html; do
+          for page in index.html projects/bototoolkit.html projects/brewmaster.html handbook.html handbook/aws/github-actions-oidc.html pagefind/pagefind.js pagefind/pagefind-entry.json; do
             curl --fail --silent --show-error --retry 3 \
               --output /dev/null "${AWS_SITE_URL%/}/$page"
           done

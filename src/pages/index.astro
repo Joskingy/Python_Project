@@ -1,0 +1,141 @@
+---
+import { getEntry, getCollection } from "astro:content";
+import Portfolio from "../layouts/Portfolio.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+const profile = (await getEntry("profile", "oscar"))!.data;
+const projects = (await getCollection("projects")).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<Portfolio
+  title="DevOps, SRE & Platform Engineering"
+  description="Oscar Valdes. Enterprise operations experience, AWS architecture, practical Python automation, and dependable delivery."
+  home
+>
+  <section class="hero" aria-labelledby="intro-title">
+    <div class="identity-mark" aria-hidden="true">ov</div>
+    <h1 id="intro-title" data-pagefind-meta="title">{profile.name}</h1>
+    <p class="role">DevOps Engineer / SRE / Platform Engineer</p>
+    <p class="intro">
+      Enterprise operations experience. AWS architecture. Practical Python
+      automation and dependable delivery.
+    </p>
+    <nav class="hero-socials" aria-label="Connect with Oscar">
+      <a href="https://github.com/Joskingy">GitHub</a>
+      <a
+        href="https://www.linkedin.com/in/oscar-vald%C3%A9s-arrambide-028571101/"
+        >LinkedIn</a
+      >
+      <a href="mailto:odyva@hotmail.com">Email</a>
+    </nav>
+    <button
+      class="motion-toggle"
+      type="button"
+      data-motion-toggle
+      hidden
+      aria-label="Pause background motion"
+    >
+      Pause motion
+    </button>
+    <a class="scroll-link" href="#work"
+      >Explore the work <span aria-hidden="true">↓</span></a
+    >
+  </section>
+  <section class="section" id="work" aria-labelledby="work-title">
+    <div class="section-head">
+      <h2 id="work-title">Selected work</h2>
+      <a class="text-link" href="https://github.com/Joskingy"
+        >All repositories</a
+      >
+    </div>
+    <div class="project-grid">
+      {
+        projects
+          .filter((project) =>
+            ["bototoolkit", "brewmaster"].includes(project.id),
+          )
+          .map((project) => <ProjectCard project={project} />)
+      }
+    </div>
+    <a class="lab-link" href="/projects/kubernetes-operations.html"
+      ><span
+        >Kubernetes operations lab<small
+          >EKS, Helm, troubleshooting, and rollback exercises</small
+        ></span
+      ><span aria-hidden="true">↗</span></a
+    >
+  </section>
+  <section class="section notebook" aria-labelledby="notes-title">
+    <div class="section-head">
+      <h2 id="notes-title">From the handbook</h2>
+      <a class="text-link" href="/handbook.html">Explore the handbook</a>
+    </div>
+    <a class="note-row" href="/handbook/aws/github-actions-oidc.html"
+      ><div>
+        <span class="project-kind">AWS & delivery</span>
+        <h3>GitHub Actions to AWS, without stored keys</h3>
+        <p>
+          Workflow identity, scoped permissions, and infrastructure approval.
+        </p>
+      </div>
+      <span aria-hidden="true">↗</span></a
+    >
+    <p class="notebook-caption">
+      Practical notes across AWS, infrastructure as code, Kubernetes, and
+      Python. Decisions, verification steps, and lessons from the projects.
+    </p>
+  </section>
+  <section class="section about" id="about" aria-labelledby="about-title">
+    <div>
+      <h2 id="about-title">Grounded in operations</h2>
+      <p>
+        I’m a cloud engineer based in Monterrey, Mexico. My background spans
+        enterprise application support, AWS architecture, and engineering
+        leadership.
+      </p>
+      <p>
+        Investigating real failures shaped how I approach automation and
+        delivery. Today, my independent work focuses on practical Python tooling
+        and Kubernetes operations.
+      </p>
+      <div class="credentials">
+        <h3>Credentials</h3>
+        <ul>
+          {
+            profile.certifications.map((certification) => (
+              <li>
+                {certification.name}
+                <small>{certification.date}</small>
+              </li>
+            ))
+          }
+        </ul>
+        <p>{profile.education}</p>
+      </div>
+    </div>
+    <div class="career" id="experience">
+      {
+        profile.experience.map((job) => (
+          <article>
+            <small>
+              {job.dates} / {job.company}
+            </small>
+            <h3>{job.role}</h3>
+            <p>{job.description}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+  <a class="lab-link" href="/projects/portfolio-engineering.html"
+    ><span
+      >The portfolio, engineered<small
+        >Static publishing, scoped delivery, and reviewed infrastructure</small
+      ></span
+    ><span aria-hidden="true">↗</span></a
+  >
+</Portfolio>
+<script>
+  import "../scripts/motion";
+</script>

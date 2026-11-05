@@ -1,7 +1,0 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="breadcrumb"><a href="{{ prefix }}index.html#work">Selected work</a><span aria-hidden="true">/</span><span>{{ project.title }}</span></div>
-<header class="article-heading"><div class="project-meta"><p class="eyebrow">{{ project.category }}</p><span class="status">{{ project.status }}</span></div><h1>{{ project.title }}</h1><p class="article-subtitle">{{ project.subtitle }}</p><ul class="tags" aria-label="Technologies">{% for item in project.stack %}<li>{{ item }}</li>{% endfor %}</ul>{% if project.repository is defined %}<a class="case-link" href="{{ project.repository }}">View repository <span aria-hidden="true">↗</span></a>{% endif %}</header>
-<div class="article-layout"><aside class="article-aside"><p class="eyebrow">Engineering perspective</p><p>Context, decisions,<br>and operational evidence.</p><a href="{{ prefix }}index.html#contact">Discuss this work ↗</a></aside><article class="prose">{{ body }}</article></div>
-<div class="article-bottom"><a class="case-link" href="{{ prefix }}index.html#work">← Back to selected work</a></div>
-{% endblock %}

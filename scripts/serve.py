@@ -1,4 +1,4 @@
-"""Build and preview the static portfolio locally, with a fixed time limit."""
+"""Preview the Astro build locally, with a fixed time limit."""
 
 import argparse
 import os
@@ -8,8 +8,6 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Event
-
-from build import build
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,7 +20,9 @@ def serve(port=5055):
     duration = int(os.environ.get("PREVIEW_DURATION_SECONDS", "1800"))
     if not 1 <= duration <= 86400:
         raise ValueError("PREVIEW_DURATION_SECONDS must be between 1 and 86400")
-    output = build()
+    output = ROOT / "dist"
+    if not (output / "index.html").is_file():
+        raise ValueError("Run npm run build before starting the static preview")
     server = ThreadingHTTPServer(
         ("127.0.0.1", port), partial(SimpleHTTPRequestHandler, directory=str(output))
     )

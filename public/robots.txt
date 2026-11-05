@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://d2ganfb65vwpme.cloudfront.net/sitemap-index.xml

@@ -1,0 +1,91 @@
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/space-grotesk-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Dela Gothic One";
+  src: url("/fonts/dela-gothic-one-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  color-scheme: dark;
+  --bg: #000000;
+  --surface: #0b0b0b;
+  --line: #282828;
+  --text: #f1f1f1;
+  --muted: #aaaaaa;
+  --accent: #e5e5e5;
+  --shell: 1180px;
+  --gutter: 40px;
+  --font-body: "Space Grotesk", system-ui, sans-serif;
+  --font-heading: "Dela Gothic One", "Arial Black", sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-padding-top: 8rem;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.75 var(--font-body);
+  isolation: isolate;
+  -webkit-tap-highlight-color: #e5e5e533;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 12% 16%, #e5e5e555 0.6px, transparent 1.1px),
+    radial-gradient(circle at 34% 63%, #e5e5e533 0.7px, transparent 1.2px),
+    radial-gradient(circle at 72% 24%, #f1f1f144 0.6px, transparent 1.1px);
+  background-size:
+    269px 307px,
+    401px 379px,
+    337px 433px;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+a,
+button,
+summary {
+  touch-action: manipulation;
+}
+button,
+input {
+  font: inherit;
+}
+button,
+summary {
+  cursor: pointer;
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 1100px) {
+  :root {
+    --gutter: 30px;
+  }
+}
+@media (max-width: 760px) {
+  :root {
+    --gutter: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

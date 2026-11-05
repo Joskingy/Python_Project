@@ -1,0 +1,59 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/tokens.css";
+import "../styles/portfolio.css";
+interface Props {
+  title: string;
+  description: string;
+  home?: boolean;
+  noindex?: boolean;
+}
+const { title, description, home = false, noindex = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <title>{title} · Oscar Valdes</title>
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:title" content={`${title} · Oscar Valdes`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="preload"
+      href="/fonts/space-grotesk-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/dela-gothic-one-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+  </head>
+  <body class:list={["portfolio", { "home-page": home }]}>
+    {home && <canvas class="starfield" data-starfield aria-hidden="true" />}
+    <a class="skip" href="#main">Skip to content</a>
+    <header><Header /></header>
+    <main
+      id="main"
+      class:list={["shell", { "home-main": home }]}
+      tabindex="-1"
+      data-pagefind-body={!noindex || undefined}
+    >
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,86 @@
+---
+import Search from "./Search.astro";
+const handbook = Astro.url.pathname.startsWith("/handbook");
+---
+
+<div
+  class:list={["site-header", { "in-handbook": handbook }]}
+  data-pagefind-ignore
+>
+  <a class="site-brand" href="/">Oscar Valdes</a>
+  <nav aria-label="Main navigation">
+    <a href="/#work">Work</a>
+    <a href="/handbook.html" aria-current={handbook ? "page" : undefined}
+      >Handbook</a
+    >
+    <a href="/#about">About</a>
+    <a href="/#contact">Contact</a>
+    <Search />
+  </nav>
+</div>
+<style>
+  .site-header {
+    width: min(1040px, calc(100% - 2 * var(--gutter)));
+    margin-inline: auto;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .site-brand {
+    font: 400 15px/1.5 var(--font-heading);
+    white-space: nowrap;
+  }
+  a {
+    color: var(--muted);
+    text-decoration: none;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+  }
+  a:hover,
+  a[aria-current],
+  .site-brand {
+    color: var(--text);
+  }
+  a:hover,
+  a[aria-current] {
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .in-handbook {
+    width: 100%;
+    max-width: none;
+    min-height: 100%;
+    border: 0;
+    padding-right: 44px;
+  }
+  @media (min-width: 50rem) {
+    .in-handbook {
+      padding-right: 0;
+    }
+  }
+  @media (max-width: 760px) {
+    .site-header {
+      flex-wrap: wrap;
+      gap: 2px;
+      padding-block: 12px;
+    }
+    nav {
+      width: 100%;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    nav a {
+      font-size: 12px;
+    }
+  }
+</style>

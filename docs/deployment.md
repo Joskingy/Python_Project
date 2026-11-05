@@ -4,26 +4,37 @@ The prepared setup uses private S3, CloudFront OAC, HTTPS, and the CloudFront
 Free flat-rate plan. Local administration uses `--profile default` in `us-east-1`.
 GitHub Actions uses a separate scoped OIDC role and the `production` environment.
 
-## Preparation status
+## Hosting and release status
 
-Account checks on November 3, 2026 found no CloudFront distributions, flat-rate
-subscriptions, or GitHub OIDC provider in the default account. The IAM identity
-predates the newer AWS Free account plan. The account-plan API returned no record
-for this legacy account. These checks found no obvious enrollment blocker.
+The portfolio is hosted on private S3 and CloudFront with HTTPS and Origin
+Access Control. The Free subscription and delivery were enabled during bootstrap.
+The default AWS profile was used for that portfolio account; verify identity
+before any future administration. Publishing continues to require the active
+Free subscription. The Astro migration itself does not change infrastructure.
 
-Final eligibility is confirmed when AWS accepts the subscription and its status
-becomes `ACTIVE`. The template requests only `FREE`. Enrollment requires creating
-both a distribution and a dedicated WAF web ACL. Resources remain unprovisioned
-until the infrastructure change set is executed.
+The site is static. No application server, database, or additional hosting service
+is needed. Custom domains remain a separate registration and configuration step.
+The Free plan omits access logging. S3 requests and storage outside covered
+credits can incur charges; spending alerts remain separate from deployment checks.
 
-The Free plan covers its associated CloudFront/WAF usage and provides S3 storage
-credits. S3 requests, storage beyond credits, and any future domain registration
-can incur charges. WAF can incur prorated charges before enrollment activates.
-Confirm the bootstrap cost before executing the change set. Keep the distribution
-disabled until the subscription is active. The Free plan omits access logging.
+The Free plan uses AWS-managed security headers. Astro generates a CSP meta tag;
+`npm run build` adds hashes for Starlight’s final inline scripts and places the
+policy before executable content. JavaScript eval and arbitrary inline scripts
+remain blocked. Pagefind’s WebAssembly and code-highlighting style attributes
+are allowed explicitly.
 
-The Free plan uses AWS-managed security headers and a CSP meta tag in each page.
-Custom CloudFront response-header policies require Business or Premium.
+## Astro release checks
+
+Use `npm ci`, `npm run check`, and `npm run build` with the Node version in
+`.node-version`. The build preserves the existing six public pages and generates
+the handbook as exact `.html` objects. The private S3 origin does not resolve
+nested directory indexes. All internal links use generated file paths, so this
+migration requires no CloudFront routing function or infrastructure update.
+
+Search uses one Starlight-generated Pagefind index for the whole site. Check it
+with `npm run preview` or the timed static preview after building. Review the
+homepage, both featured projects, handbook navigation, search, and motion controls
+before merging the migration to main.
 
 ## One-time workflow access
 
@@ -113,8 +124,12 @@ variables are available. Run Portfolio CI manually on `main` for the first relea
 The workflow builds and checks all pages, saves `dist/` as
 `portfolio-<commit SHA>`, and publishes that tested artifact. It checks the expected
 AWS account and active Free subscription, uploads assets before HTML, refreshes
-the CDN, and verifies the homepage plus both featured case studies. Deployments run
+the CDN, and verifies the homepage, featured case studies, handbook deep link, and search entry files. Deployments run
 serially. Artifact retention is seven days.
+
+Hashed `_astro/` assets use a one-year immutable cache. Fonts, search files,
+and other public assets use five minutes; HTML uses one minute with revalidation.
+All assets are uploaded before HTML.
 
 The upload keeps existing objects so cached pages can still load their assets.
 Review unused current objects during occasional maintenance. S3 retains prior

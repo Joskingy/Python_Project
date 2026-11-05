@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>BotoToolkit · Design preview</title>
+    <link rel="icon" href="data:," />
+    <link
+      rel="preload"
+      href="fonts/space-grotesk-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="fonts/dela-gothic-one-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="design.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="preview-note">
+      Design review · Mono-inspired black portfolio
+    </div>
+    <header class="header shell">
+      <a class="brand" href="index.html">Oscar Valdes</a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html#work">Work</a><a href="handbook.html">Handbook</a
+        ><a href="index.html#about">About</a
+        ><a href="index.html#contact">Contact</a
+        ><button
+          class="search-trigger"
+          data-search
+          hidden
+          aria-haspopup="dialog"
+        >
+          Search <kbd>Ctrl K</kbd>
+        </button>
+      </nav>
+    </header>
+    <main id="main" class="shell" tabindex="-1">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html#work">Selected work</a
+        ><span aria-hidden="true">/</span><span>BotoToolkit</span>
+      </nav>
+      <div class="case-hero">
+        <p class="role">Independent project / Python automation</p>
+        <h1>BotoToolkit.<br />Context before action.</h1>
+        <p class="lead">
+          BotoToolkit brings identity checks, deployment investigation, and
+          reviewed retries into one AWS Amplify operations workflow.
+        </p>
+        <div class="actions">
+          <a class="button" href="https://github.com/Joskingy/BotoToolkit"
+            >View the repository <span aria-hidden="true">↗</span></a
+          ><a class="text-link" href="#workflow">Explore the workflow</a>
+        </div>
+      </div>
+      <dl class="case-meta">
+        <div>
+          <dt>My contribution</dt>
+          <dd>CLI design and implementation</dd>
+        </div>
+        <div>
+          <dt>Built with</dt>
+          <dd>Python, Boto3, Typer, Rich, uv</dd>
+        </div>
+        <div>
+          <dt>Scope</dt>
+          <dd>Selected Amplify accounts and regions</dd>
+        </div>
+      </dl>
+      <div class="case-grid">
+        <nav class="outline" aria-label="On this page">
+          <strong>Inside the case study</strong
+          ><a href="#problem">The operational problem</a
+          ><a href="#workflow">Operator workflow</a
+          ><a href="#decisions">Engineering decisions</a
+          ><a href="#evidence">Evidence & limitations</a
+          ><a href="#related">Related reading</a>
+        </nav>
+        <div class="article">
+          <details class="mobile-contents">
+            <summary>Inside the case study</summary>
+            <a href="#problem">The operational problem</a
+            ><a href="#workflow">Operator workflow</a
+            ><a href="#decisions">Engineering decisions</a
+            ><a href="#evidence">Evidence & limitations</a
+            ><a href="#related">Related reading</a>
+          </details>
+          <section id="problem">
+            <h2>The first question is context.</h2>
+            <p>
+              Which branch failed? What changed in its configuration? Which
+              account am I actually investigating? Answering an operational
+              question can mean moving between several screens before the
+              evidence comes together.
+            </p>
+            <p>
+              I built <strong>amplify-ops</strong> within BotoToolkit to make
+              that investigation explicit. The tool checks identity, keeps
+              resource scope visible, and distinguishes incomplete reads from
+              complete results.
+            </p>
+          </section>
+          <section id="workflow">
+            <h2>From identity to a reviewed action</h2>
+            <p>
+              Open each step to see the behavior behind the interface.
+              Investigation remains useful even when no retry is needed.
+            </p>
+            <div class="workflow">
+              <details open>
+                <summary>
+                  <span class="flow-number">1</span>Establish identity
+                </summary>
+                <p>
+                  The operator supplies a profile, an expected AWS account, and
+                  selected regions. An STS identity check runs before
+                  operational reads, helping catch work in the wrong
+                  environment.
+                </p>
+              </details>
+              <details>
+                <summary>
+                  <span class="flow-number">2</span>Investigate the deployment
+                </summary>
+                <p>
+                  Collect Amplify Hosting inventory and deployment evidence
+                  within the selected scope. Contextual errors and meaningful
+                  exit codes make partial reads visible.
+                </p>
+              </details>
+              <details>
+                <summary>
+                  <span class="flow-number">3</span>Compare configuration
+                </summary>
+                <p>
+                  Report configuration differences while withholding the
+                  underlying values. The operator can identify a mismatch
+                  without casually exposing configuration in the report.
+                </p>
+              </details>
+              <details>
+                <summary>
+                  <span class="flow-number">4</span>Review a retry, if needed
+                </summary>
+                <p>
+                  The deployment command submits an explicitly reviewed retry.
+                  This transition is separate from the read-only operational
+                  commands and is optional.
+                </p>
+              </details>
+            </div>
+          </section>
+          <section id="decisions">
+            <h2>Decisions that shape the tool</h2>
+            <div class="decision-list">
+              <div>
+                <h3>Identity comes first.</h3>
+                <p>
+                  Account context is an input to the investigation. Checking it
+                  early reduces the chance of confidently investigating the
+                  wrong environment.
+                </p>
+              </div>
+              <div>
+                <h3>Scope stays visible.</h3>
+                <p>
+                  Amplify Hosting inventory does not claim to discover every
+                  backend dependency. Reports should help an operator judge what
+                  was actually read.
+                </p>
+              </div>
+              <div>
+                <h3>Useful differences, withheld values.</h3>
+                <p>
+                  Configuration comparison surfaces changes while keeping the
+                  values themselves out of the report.
+                </p>
+              </div>
+              <div>
+                <h3>Incomplete evidence is explicit.</h3>
+                <p>
+                  A partial read must remain distinguishable from an empty or
+                  complete result. Error context is part of the interface.
+                </p>
+              </div>
+            </div>
+          </section>
+          <section id="evidence">
+            <h2>Inspect the implementation</h2>
+            <p>
+              The public repository contains the CLI, command documentation, uv
+              lockfile, and pytest checks. Its CI configuration includes Linux
+              and Windows tests, sensitive-information checks, and distribution
+              smoke checks.
+            </p>
+            <ul>
+              <li>
+                <a href="https://github.com/Joskingy/BotoToolkit#readme"
+                  >Command documentation and usage</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Joskingy/BotoToolkit/blob/main/.github/workflows/ci.yml"
+                  >CI workflow and verification approach</a
+                >
+              </li>
+            </ul>
+            <aside class="callout">
+              <strong>Scope & limitations</strong>
+              <p>
+                This case study covers an independent tool for Amplify Hosting
+                operations in selected accounts and regions. CI authentication
+                support is documented as future work. No uptime or productivity
+                improvements are claimed here.
+              </p>
+            </aside>
+          </section>
+          <section id="related">
+            <h2>The principle carries into delivery.</h2>
+            <p>
+              BotoToolkit verifies a local operator’s identity. This portfolio’s
+              delivery pipeline uses a separate mechanism, GitHub OIDC, to
+              establish a workflow’s AWS identity. Both make the boundary
+              between identity and permission explicit.
+            </p>
+            <a class="related" href="handbook.html"
+              >GitHub Actions to AWS, without stored keys<span
+                >Handbook / AWS & delivery / Trust, permissions, and
+                approval</span
+              ></a
+            >
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer class="footer shell" id="contact">
+      <div>
+        <h2>Let’s build something dependable.</h2>
+        <p>Oscar Valdes · Monterrey, Mexico</p>
+      </div>
+      <div class="footer-links">
+        <a href="mailto:odyva@hotmail.com">Email Oscar</a
+        ><a href="https://github.com/Joskingy">GitHub</a
+        ><a
+          href="https://www.linkedin.com/in/oscar-vald%C3%A9s-arrambide-028571101/"
+          >LinkedIn</a
+        >
+      </div>
+    </footer>
+    <script src="design.js" defer></script>
+  </body>
+</html>

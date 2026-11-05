@@ -1,34 +1,57 @@
 # Oscar Valdes · Portfolio
 
-A portfolio focused on DevOps, SRE, and Platform Engineering. Python renders
-Jinja templates and Markdown case studies into static pages in `dist/`.
+A static Astro portfolio and Starlight engineering handbook for DevOps, SRE,
+and Platform Engineering. Black and grayscale, locally hosted Mono-inspired
+fonts, and a lightweight interactive starfield.
 
-Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run:
+## Run locally
+
+Use Node 24 LTS (`.node-version` pins the verified release), then:
 
 ```powershell
-uv sync --locked
-uv run --locked pytest -q
-uv run --locked python scripts/build.py
+npm ci
+npm run dev
 ```
 
-Python 3.13 and dependencies are managed from `pyproject.toml` and `uv.lock`.
-Add packages with `uv add`; use `uv add --dev` for development tools.
+Open the local URL printed in the terminal. Ctrl+C stops the server.
+For the production build, including full-text search:
 
-Preview the portfolio with `uv run --locked python scripts/serve.py`, then open
-http://127.0.0.1:5055. Ctrl+C stops it; it also stops automatically after 30 minutes.
-If your terminal does not forward Ctrl+C, run `uv run --locked python scripts/serve.py --stop`
-from another terminal in this directory.
-Edit `content/profile.json` and `content/projects/*.md`, then rebuild or restart
-the preview. The original résumé stays local and is not copied into `dist/`.
+```powershell
+npm run check
+npm run build
+npm run preview
+```
 
-The original Flask/Compose application remains available during the transition.
-Its containers and source are separate from the generated portfolio.
-See [local development](docs/local-development.md) for the legacy preview controls.
+Search is generated during the build. It is not available in the live development
+server. The build validates exact S3 paths, anchors, and the generated content
+security policy. It also checks the initial homepage asset budget.
 
-GitHub Actions validates changes on `dev`, `main`, and pull requests to `main`.
-Successful runs save the static site as a downloadable artifact for seven days.
-Production deployment is disabled while AWS hosting is being prepared.
-See [build and deployment status](docs/deployment.md).
+For an automatically timed preview with a separate stop command, see
+[local development](docs/local-development.md).
 
-Run `bash tests/deploy.sh` to check deployment ordering and failure handling with
-a fake Docker CLI, without starting containers or accessing a database.
+## Edit content
+
+- `src/data/profile.json` contains the public profile.
+- `src/content/projects/` contains case studies and typed metadata.
+- `src/content/docs/handbook/` contains Starlight articles.
+- `src/styles/` contains shared tokens and separate portfolio/handbook styles.
+- `public/` contains publishable assets, including fonts and their licenses.
+
+The original résumé stays local. Only put an approved public version in `public/`.
+The earlier design mockups remain in `docs/design-preview/` for comparison.
+
+## Delivery
+
+GitHub Actions checks dev and pull requests, then publishes the tested main
+artifact to private S3 and CloudFront through OIDC. Infrastructure changes use
+a separate manual change-set review and approval workflow. Existing `.html`
+URLs are preserved, including the handbook’s nested pages.
+
+See [deployment](docs/deployment.md) for hosting, release, and rollback details.
+
+## Python and Flask history
+
+The original Flask/Compose application and database remain separate from the
+portfolio. Python 3.13, uv, and the original app dependencies are retained for
+that work and the optional managed preview. The old Jinja website generator has
+been retired. No database is needed to build or serve the portfolio.

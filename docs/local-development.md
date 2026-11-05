@@ -1,30 +1,53 @@
-# Managing local servers
+# Local development
 
-## Static portfolio
+## Astro portfolio
 
-Run `uv run --locked python scripts/serve.py` and open http://127.0.0.1:5055.
-This builds the portfolio, serves only `dist/`, and automatically stops after
-30 minutes. Ctrl+C stops it early. Rebuild or restart to see content changes.
-For a build without a server, use `uv run --locked python scripts/build.py`.
+Use Node 24 LTS, matching `.node-version`, and install with `npm ci`.
 
-If Ctrl+C does not reach the preview on Windows, try Ctrl+Break or run this from
-another terminal in the project directory:
+```powershell
+npm run dev
+```
+
+The terminal prints the local address. Changes refresh automatically. Keep the
+terminal attached and use Ctrl+C to stop it. Closing the browser does not stop
+any local server.
+
+For the generated site and full-text search:
+
+```powershell
+npm run check
+npm run build
+npm run preview
+```
+
+Both Astro servers bind to localhost. They remain running until stopped. Use
+the timed preview below if you want automatic shutdown and a separate stop command.
+No container or database is required.
+
+## Timed production preview
+
+After `npm run build`, use the retained Python helper:
+
+```powershell
+uv sync --locked
+uv run --locked python scripts/serve.py
+```
+
+Open http://127.0.0.1:5055. This serves only the existing `dist/` build and stops
+after 30 minutes. Rebuild and refresh after changing content. Ctrl+C or Ctrl+Break
+stops it early. From another terminal in the project directory:
 
 ```powershell
 uv run --locked python scripts/serve.py --stop
 ```
 
-This requests shutdown without terminating unrelated Python processes. It works
-with the updated preview; a process started before this fix must first be stopped
-using its terminal or its specific PID in Task Manager.
+This stops only the managed preview. It does not stop an Astro dev/preview server.
+For an Astro server whose terminal is unavailable, identify its exact Node PID
+and command line in Task Manager, then end that process. Avoid stopping every
+Node or Python process on the computer.
 
-The Compose commands below still preview the original Flask sample application.
-They will be replaced with static preview controls in the preview/CI phase.
-
-Install dependencies with `uv sync --locked` from the repository root. This uses
-Python 3.13 and creates a local `.venv`. Run page checks with `uv run --locked pytest -q`.
-For a preview without Docker, run `uv run --locked python scripts/preview.py`;
-it uses sample records and automatically stops after 30 minutes. Ctrl+C stops it early.
+Run the retained preview checks after building with `uv run --locked pytest -q`.
+The following controls apply to the original Flask sample application.
 
 ## Legacy design preview (sample records only)
 

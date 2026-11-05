@@ -1,0 +1,42 @@
+<div class="workflow">
+  <details open>
+    <summary>
+      <span class="flow-number">1</span>Establish identity
+    </summary>
+    <p>
+      The operator supplies a profile, an expected AWS account, and selected
+      regions. An STS identity check runs before operational reads, helping
+      catch work in the wrong environment.
+    </p>
+  </details>
+  <details>
+    <summary>
+      <span class="flow-number">2</span>Investigate the deployment
+    </summary>
+    <p>
+      Collect Amplify Hosting inventory and deployment evidence within the
+      selected scope. Contextual errors and meaningful exit codes make partial
+      reads visible.
+    </p>
+  </details>
+  <details>
+    <summary>
+      <span class="flow-number">3</span>Compare configuration
+    </summary>
+    <p>
+      Report configuration differences while withholding the underlying values.
+      The operator can identify a mismatch without casually exposing
+      configuration in the report.
+    </p>
+  </details>
+  <details>
+    <summary>
+      <span class="flow-number">4</span>Review a retry, if needed
+    </summary>
+    <p>
+      The deployment command submits an explicitly reviewed retry. This
+      transition is separate from the read-only operational commands and is
+      optional.
+    </p>
+  </details>
+</div>

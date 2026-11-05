@@ -1,0 +1,57 @@
+---
+title: "BotoToolkit"
+subtitle: "Context before action."
+category: "Python automation"
+status: "Independent project"
+summary: "An Amplify operations CLI with verified identity, deployment investigation, redacted configuration comparisons, and explicitly reviewed deployment retries."
+stack: ["Python", "Boto3", "Typer", "Rich", "uv"]
+repository: "https://github.com/Joskingy/BotoToolkit"
+contribution: "CLI design and implementation"
+scope: "Selected Amplify accounts and regions"
+order: 0
+---
+
+import OperatorWorkflow from "../../components/OperatorWorkflow.astro";
+
+## The first question is context
+
+Which branch failed? What changed in its configuration? Which account am I actually investigating? Answering an operational question can mean moving between several screens before the evidence comes together.
+
+I built **amplify-ops** within BotoToolkit to make that investigation explicit. The tool checks identity, keeps resource scope visible, and distinguishes incomplete reads from complete results.
+
+## From identity to a reviewed action
+
+Open each step to see the behavior behind the interface. Investigation remains useful even when no retry is needed.
+
+<OperatorWorkflow />
+
+## Decisions that shape the tool
+
+### Identity comes first
+
+The operator supplies a profile, an expected AWS account, and selected regions. Checking identity before operational reads helps catch work in the wrong environment.
+
+### Scope stays visible
+
+Amplify Hosting inventory does not claim to discover every backend dependency. Reports explain what was actually read, with contextual errors and meaningful exit codes for partial results.
+
+### Useful differences, withheld values
+
+Configuration comparison surfaces changes while keeping the values themselves out of the report. The deployment command submits an explicitly reviewed retry, separate from the read-only commands.
+
+## Inspect the implementation
+
+The public repository contains the CLI, command documentation, uv lockfile, and pytest checks. Its CI configuration includes Linux and Windows tests, sensitive-information checks, and distribution smoke checks.
+
+- [Command documentation and usage](https://github.com/Joskingy/BotoToolkit#readme)
+- [CI workflow and verification approach](https://github.com/Joskingy/BotoToolkit/blob/main/.github/workflows/ci.yml)
+
+## Scope and limitations
+
+This case study covers an independent tool for Amplify Hosting operations in selected accounts and regions. CI authentication support is documented as future work. No uptime or productivity improvements are claimed here.
+
+## The principle carries into delivery
+
+BotoToolkit verifies a local operator’s identity. This portfolio’s delivery pipeline uses a separate mechanism, GitHub OIDC, to establish a workflow’s AWS identity. Both make the boundary between identity and permission explicit.
+
+[Read about GitHub Actions authentication to AWS](/handbook/aws/github-actions-oidc.html) or [explore the Python CLI practices](/handbook/python/operator-cli.html).
