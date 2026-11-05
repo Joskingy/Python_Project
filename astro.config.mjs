@@ -47,8 +47,9 @@ export default defineConfig({
       customCss: ["./src/styles/tokens.css", "./src/styles/handbook.css"],
       components: {
         Header: "./src/components/Header.astro",
+        MobileMenuToggle: "./src/components/HandbookMenuToggle.astro",
         Footer: "./src/components/HandbookFooter.astro",
-        ThemeProvider: "./src/components/DarkTheme.astro",
+        ThemeProvider: "./src/components/ThemeProvider.astro",
         ThemeSelect: "./src/components/ThemeSelect.astro",
       },
       sidebar: [

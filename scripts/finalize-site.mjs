@@ -139,6 +139,7 @@ for (const [filename, page] of pages) {
 for (const filename of [
   "index.html",
   "engineering.html",
+  "projects.html",
   "projects/bototoolkit.html",
   "projects/brewmaster.html",
   "projects/kubernetes-operations.html",

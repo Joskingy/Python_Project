@@ -2,8 +2,9 @@
 import type { CollectionEntry } from "astro:content";
 interface Props {
   project: CollectionEntry<"projects">;
+  heading?: "h2" | "h3";
 }
-const { project } = Astro.props;
+const { project, heading: Heading = "h3" } = Astro.props;
 const { data, id } = project;
 const url = `/projects/${id}.html`;
 ---
@@ -28,6 +29,19 @@ const url = `/projects/${id}.html`;
             />
             <path d="M114 53l5 5 9-15" stroke="currentColor" stroke-width="2" />
           </>
+        ) : id === "kubernetes-operations" ? (
+          <>
+            <path d="m120 10 36 20v40l-36 20-36-20V30Z" stroke="currentColor" stroke-width="1.5" />
+            <path d="m120 50-36-20m36 20 36-20m-36 20v40M120 50V10" stroke="currentColor" stroke-opacity=".4" />
+            <circle cx="120" cy="50" r="9" stroke="currentColor" stroke-width="1.5" />
+          </>
+        ) : id === "portfolio-engineering" ? (
+          <>
+            <rect x="47" y="22" width="146" height="62" rx="4" stroke="currentColor" stroke-width="1.5" />
+            <path d="M47 37h146M77 60h86m-12-9 12 9-12 9" stroke="currentColor" stroke-width="1.5" />
+            <circle cx="58" cy="29" r="2" fill="currentColor" />
+            <circle cx="66" cy="29" r="2" fill="currentColor" />
+          </>
         ) : (
           <path
             d="M88 42h51v20a22 22 0 0 1-22 22h-7a22 22 0 0 1-22-22zM139 47h8a12 12 0 0 1 0 24h-11M79 87h70M104 31c-10-11 9-13 0-25m18 25c-10-11 9-13 0-25"
@@ -41,7 +55,7 @@ const url = `/projects/${id}.html`;
   </div>
   <div class="project-card-body">
     <p class="project-kind">{data.status}</p>
-    <h3><a href={url}>{data.title}</a></h3>
+    <Heading><a href={url}>{data.title}</a></Heading>
     <p>{data.summary}</p>
     <ul class="tags" aria-label={`${data.title} technologies`}>
       {data.stack.map((technology) => <li>{technology}</li>)}

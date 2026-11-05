@@ -1,0 +1,48 @@
+<button
+  type="button"
+  class="theme-toggle"
+  data-theme-toggle
+  aria-label="Dark blue theme"
+  aria-pressed="false"
+  title="Use dark blue theme"
+  hidden
+>
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill="currentColor" stroke="none" />
+  </svg>
+</button>
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>("[data-theme-toggle]")!;
+  const root = document.documentElement;
+  function syncTheme() {
+    const blue = root.dataset.palette === "blue";
+    const label = blue ? "Use black theme" : "Use dark blue theme";
+    toggle.setAttribute("aria-pressed", String(blue));
+    toggle.title = label;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", blue ? "#060d1b" : "#000000");
+  }
+  syncTheme();
+  toggle.hidden = false;
+  toggle.addEventListener("click", () => {
+    root.dataset.palette = root.dataset.palette === "blue" ? "black" : "blue";
+    try { localStorage.setItem("portfolio-palette", root.dataset.palette); } catch {}
+    syncTheme();
+  });
+</script>
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+  }
+  .theme-toggle:hover,
+  .theme-toggle[aria-pressed="true"] { color: var(--accent); }
+</style>

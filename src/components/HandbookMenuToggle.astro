@@ -1,0 +1,53 @@
+<button
+  class="handbook-menu-toggle"
+  popovertarget="starlight__sidebar"
+  aria-label="Handbook topics"
+  title="Handbook topics"
+>
+  <svg class="topics-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 5c-3-2-6-2-9-1v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1Zm0 0v15" />
+  </svg>
+  <svg class="topics-close" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+    <path d="m6 6 12 12M18 6 6 18" />
+  </svg>
+</button>
+<style>
+  button {
+    position: fixed;
+    top: calc((var(--sl-nav-height) - 44px) / 2);
+    right: max(16px, env(safe-area-inset-right));
+    z-index: var(--sl-z-index-navbar);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+  }
+  button:hover,
+  button:has(~ :popover-open) {
+    color: var(--text);
+  }
+  .topics-close,
+  button:has(~ :popover-open) .topics-open {
+    display: none;
+  }
+  button:has(~ :popover-open) .topics-close {
+    display: block;
+  }
+  @media (min-width: 50rem) {
+    button { display: none; }
+  }
+  @media print {
+    button { display: none; }
+  }
+</style>
+<style is:global>
+  body:has(#starlight__sidebar:popover-open) { overflow: hidden; }
+  @media (min-width: 50rem) {
+    body:has(#starlight__sidebar:popover-open) { overflow: auto; }
+  }
+</style>

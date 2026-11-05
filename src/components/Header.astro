@@ -1,38 +1,100 @@
 ---
 import Search from "./Search.astro";
+import ThemeToggle from "./ThemeToggle.astro";
 const handbook = Astro.url.pathname.startsWith("/handbook");
+const work = Astro.url.pathname.startsWith("/projects");
+const links = [
+  { label: "Work", href: "/projects.html" },
+  { label: "Handbook", href: "/handbook.html" },
+  { label: "About", href: "/#about" },
+  { label: "Contact", href: "/#contact" },
+];
 ---
 
 <div
   class:list={["site-header", { "in-handbook": handbook }]}
   data-pagefind-ignore
 >
-  <a class="site-brand" href="/">Oscar Valdes</a>
-  <nav aria-label="Main navigation">
-    <a href="/#work">Work</a>
-    <a href="/handbook.html" aria-current={handbook ? "page" : undefined}
-      >Handbook</a
-    >
-    <a href="/#about">About</a>
-    <a href="/#contact">Contact</a>
-    <Search />
-  </nav>
+  <div class="header-inner">
+    <a class="site-brand" href="/" aria-label="Oscar Valdes, home">
+      <span class="brand-name">Oscar Valdes</span>
+      <span class="brand-short" aria-hidden="true">OV</span>
+    </a>
+    <nav class="desktop-nav" aria-label="Main navigation">
+      {links.map(({ label, href }) => (
+        <a href={href} aria-current={(handbook && label === "Handbook") || (work && label === "Work") ? "page" : undefined}>{label}</a>
+      ))}
+    </nav>
+    <div class="header-actions">
+      <Search />
+      <ThemeToggle />
+      <details class="mobile-menu">
+        <summary aria-label="Site navigation">
+          <svg class="menu-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg class="menu-close" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </summary>
+        <div class="mobile-panel">
+          <nav aria-label="Mobile navigation">
+            {links.map(({ label, href }) => (
+              <a href={href} aria-current={(handbook && label === "Handbook") || (work && label === "Work") ? "page" : undefined}>{label}</a>
+            ))}
+          </nav>
+        </div>
+      </details>
+    </div>
+  </div>
 </div>
+<script>
+  const menu = document.querySelector<HTMLDetailsElement>(".mobile-menu")!;
+  const toggle = menu.querySelector("summary")!;
+  menu.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => { menu.open = false; });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menu.open) {
+      menu.open = false;
+      toggle.focus();
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!menu.contains(event.target as Node)) menu.open = false;
+  });
+  menu.addEventListener("focusout", (event) => {
+    if (event.relatedTarget && !menu.contains(event.relatedTarget as Node)) menu.open = false;
+  });
+  matchMedia("(min-width: 50rem)").addEventListener("change", () => { menu.open = false; });
+</script>
 <style>
   .site-header {
-    width: min(var(--portfolio-width), calc(100% - 2 * var(--gutter)));
+    position: relative;
+    width: 100%;
+    background: var(--header-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--header-line);
+    font-family: var(--font-body);
+  }
+  .header-inner {
+    max-width: 768px;
     margin-inline: auto;
-    min-height: var(--site-header-height);
+    min-height: calc(var(--site-header-height) - 1px);
+    padding-inline: max(24px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-right));
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 28px;
-    border-bottom: 1px solid var(--line);
+    gap: 16px;
   }
   .site-brand {
     font: 400 15px/1.5 var(--font-heading);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     white-space: nowrap;
   }
+  .brand-short { display: none; }
   a {
     color: var(--muted);
     text-decoration: none;
@@ -40,6 +102,9 @@ const handbook = Astro.url.pathname.startsWith("/handbook");
     display: inline-flex;
     align-items: center;
     font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: lowercase;
   }
   a:hover,
   a[aria-current],
@@ -51,36 +116,98 @@ const handbook = Astro.url.pathname.startsWith("/handbook");
     text-decoration: underline;
     text-underline-offset: 6px;
   }
-  nav {
+  .desktop-nav,
+  .header-actions {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 20px;
   }
-  .in-handbook {
-    width: 100%;
-    max-width: none;
-    min-height: 100%;
+  .header-actions {
+    gap: 8px;
+  }
+  .mobile-menu {
+    display: none;
+  }
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
     border: 0;
-    padding-right: 44px;
+    list-style: none;
+    color: var(--muted);
+    cursor: pointer;
+    touch-action: manipulation;
   }
-  @media (min-width: 50rem) {
-    .in-handbook {
-      padding-right: 0;
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:hover,
+  .mobile-menu[open] summary {
+    color: var(--text);
+  }
+  summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  .menu-close,
+  .mobile-menu[open] .menu-open {
+    display: none;
+  }
+  .mobile-menu[open] .menu-close {
+    display: block;
+  }
+  .mobile-panel {
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    background: var(--panel-bg);
+    border-bottom: 1px solid var(--header-line);
+    max-height: calc(100svh - var(--site-header-height));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .mobile-panel nav {
+    max-width: 768px;
+    margin-inline: auto;
+    padding: 12px max(24px, env(safe-area-inset-left)) 16px max(24px, env(safe-area-inset-right));
+    display: grid;
+  }
+  .mobile-panel a {
+    min-height: 48px;
+    font-size: 15px;
+  }
+  @media (max-width: 49.999rem) {
+    .header-inner {
+      gap: 12px;
+      padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+    }
+    .desktop-nav {
+      display: none;
+    }
+    .mobile-menu {
+      display: block;
+    }
+    .in-handbook .header-actions {
+      margin-right: 44px;
     }
   }
-  @media (max-width: 760px) {
-    .site-header {
-      flex-wrap: wrap;
-      gap: 2px;
-      padding-block: 12px;
+  @media (max-width: 360px) {
+    .header-inner,
+    .header-actions {
+      gap: 4px;
     }
-    nav {
-      width: 100%;
-      justify-content: space-between;
-      gap: 10px;
+    .site-brand {
+      font-size: 11.5px;
+      letter-spacing: 0.08em;
     }
-    nav a {
-      font-size: 12px;
-    }
+  }
+  @media (max-width: 440px) {
+    .in-handbook .brand-name { display: none; }
+    .in-handbook .brand-short { display: inline; }
+    .in-handbook .site-brand { font-size: 15px; }
   }
 </style>

@@ -1,0 +1,8 @@
+<script is:inline>
+  let palette = "black";
+  try {
+    if (localStorage.getItem("portfolio-palette") === "blue") palette = "blue";
+  } catch {}
+  document.documentElement.dataset.theme = "dark";
+  document.documentElement.dataset.palette = palette;
+</script>

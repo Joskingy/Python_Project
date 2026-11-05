@@ -20,12 +20,32 @@
   --text: #f1f1f1;
   --muted: #aaaaaa;
   --accent: #e5e5e5;
+  --surface-card: #080808;
+  --surface-raised: #111111;
+  --border-strong: #555555;
+  --header-bg: rgb(0 0 0 / 80%);
+  --panel-bg: rgb(0 0 0 / 97%);
+  --header-line: #333333;
   --shell: 1180px;
   --portfolio-width: 720px;
-  --site-header-height: 56px;
+  --site-header-height: 57px;
   --gutter: 40px;
   --font-body: "Space Grotesk", system-ui, sans-serif;
   --font-heading: "Dela Gothic One", "Arial Black", sans-serif;
+}
+:root[data-palette="blue"] {
+  --bg: #060d1b;
+  --surface: #0b1629;
+  --surface-card: #0b1629;
+  --surface-raised: #10203a;
+  --line: #253650;
+  --border-strong: #496480;
+  --text: #eaf1ff;
+  --muted: #a4b4cd;
+  --accent: #9cc8ff;
+  --header-bg: rgb(6 13 27 / 86%);
+  --panel-bg: rgb(6 13 27 / 98%);
+  --header-line: #253650;
 }
 * {
   box-sizing: border-box;
@@ -84,7 +104,6 @@ summary {
 @media (max-width: 760px) {
   :root {
     --gutter: 22px;
-    --site-header-height: 114px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,92 @@
+---
+import { getCollection } from "astro:content";
+import Portfolio from "../layouts/Portfolio.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+const categories = [...new Set(projects.map((project) => project.data.category))];
+---
+
+<Portfolio title="Projects" description="Selected projects, AWS deployment contributions, Python automation, and platform engineering labs by Oscar Valdes.">
+  <section class="work-page" aria-labelledby="projects-title">
+    <div class="work-intro">
+      <h1 id="projects-title" data-pagefind-meta="title">Projects</h1>
+      <p>Tools I’ve built, systems I’ve helped deploy, and practices I’ve put to work.</p>
+    </div>
+    <div class="project-filters" role="group" aria-label="Filter projects" data-project-filters hidden>
+      <button type="button" data-project-filter="all" aria-pressed="true">All</button>
+      {categories.map((category) => (
+        <button type="button" data-project-filter={category} aria-pressed="false">{category}</button>
+      ))}
+    </div>
+    <p class="project-count" role="status" data-project-count>{projects.length} projects and labs</p>
+    <ul class="work-grid" role="list">
+      {projects.map((project) => (
+        <li data-project-category={project.data.category}>
+          <ProjectCard project={project} heading="h2" />
+        </li>
+      ))}
+    </ul>
+  </section>
+</Portfolio>
+<script>
+  const filters = document.querySelector<HTMLElement>("[data-project-filters]")!;
+  const buttons = filters.querySelectorAll<HTMLButtonElement>("[data-project-filter]");
+  const projects = document.querySelectorAll<HTMLElement>("[data-project-category]");
+  const count = document.querySelector<HTMLElement>("[data-project-count]")!;
+  filters.hidden = false;
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const category = button.dataset.projectFilter;
+      let visible = 0;
+      projects.forEach((project) => {
+        project.hidden = category !== "all" && project.dataset.projectCategory !== category;
+        if (!project.hidden) visible++;
+      });
+      buttons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+      count.textContent = `${visible} ${visible === 1 ? "project or lab" : "projects and labs"}`;
+    });
+  });
+</script>
+<style>
+  .work-page { max-width: 1104px; margin-inline: auto; padding-block: 56px 80px; }
+  .work-intro { max-width: 48rem; }
+  .work-page .work-intro h1 { font-size: clamp(26px, 3vw, 30px); }
+  .work-intro p { margin-top: 12px; font-size: 16px; }
+  .project-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .work-page .project-filters button {
+    min-height: 44px;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: lowercase;
+  }
+  .work-page .project-filters button:hover,
+  .work-page .project-filters button[aria-pressed="true"] { border-color: var(--accent); color: var(--text); }
+  .project-count { margin-top: 16px; font-size: 12px; }
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    padding: 0;
+    margin: 24px 0 0;
+    list-style: none;
+  }
+  .work-grid > li { min-width: 0; }
+  :global(.portfolio) .work-grid :global(.project-card) { display: flex; flex-direction: column; height: 100%; border-radius: 18px; }
+  :global(.portfolio) .work-grid :global(.project-emblem) { height: auto; aspect-ratio: 16 / 9; }
+  :global(.portfolio) .work-grid :global(.project-card-body) { display: flex; flex-direction: column; flex: 1; padding: 24px; }
+  :global(.portfolio) .work-grid :global(.project-card h2) { font-size: 20px; }
+  :global(.portfolio) .work-grid :global(.project-card-body > p) { font-size: 15px; }
+  :global(.portfolio) .work-grid :global(.project-card-body .text-link) { margin-top: auto; padding-top: 20px; }
+  :global(.portfolio) .work-grid :global(.tags) { margin-bottom: 8px; }
+  :global(.portfolio) .work-grid :global(.tags li) { border-radius: 12px; }
+  @media (max-width: 1050px) { .work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) {
+    .work-page { padding-block: 36px 56px; }
+    .work-grid { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
