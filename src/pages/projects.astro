@@ -20,9 +20,9 @@ const categories = [...new Set(projects.map((project) => project.data.category))
     </div>
     <p class="project-count" role="status" data-project-count>{projects.length} projects and labs</p>
     <ul class="work-grid" role="list">
-      {projects.map((project) => (
+      {projects.map((project, index) => (
         <li data-project-category={project.data.category}>
-          <ProjectCard project={project} heading="h2" />
+          <ProjectCard project={project} heading="h2" eager={index === 0} />
         </li>
       ))}
     </ul>
@@ -77,7 +77,6 @@ const categories = [...new Set(projects.map((project) => project.data.category))
   }
   .work-grid > li { min-width: 0; }
   :global(.portfolio) .work-grid :global(.project-card) { display: flex; flex-direction: column; height: 100%; border-radius: 18px; }
-  :global(.portfolio) .work-grid :global(.project-emblem) { height: auto; aspect-ratio: 16 / 9; }
   :global(.portfolio) .work-grid :global(.project-card-body) { display: flex; flex-direction: column; flex: 1; padding: 24px; }
   :global(.portfolio) .work-grid :global(.project-card h2) { font-size: 20px; }
   :global(.portfolio) .work-grid :global(.project-card-body > p) { font-size: 15px; }
