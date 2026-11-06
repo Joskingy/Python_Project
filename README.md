@@ -49,9 +49,13 @@ URLs are preserved, including the handbook’s nested pages.
 
 See [deployment](docs/deployment.md) for hosting, release, and rollback details.
 
-## Python and Flask history
+## Python tooling
 
-The original Flask/Compose application and database remain separate from the
-portfolio. Python 3.13, uv, and the original app dependencies are retained for
-that work and the optional managed preview. The old Jinja website generator has
-been retired. No database is needed to build or serve the portfolio.
+Python 3.13 and uv support the optional timed static preview and its checks.
+The preview uses only the standard library; pytest and Ruff are development
+tools. CI runs the pinned CloudFormation linter separately through `uv tool run`.
+
+The original Flask app, Compose setup, and container deployment scripts have
+been retired. Their source remains in Git history. Existing database data and
+Docker volumes are preserved; no database is needed for the portfolio. See
+[local development](docs/local-development.md#retired-flask-lab) for preservation notes.
