@@ -1,15 +1,9 @@
 [project]
 name = "oscar-portfolio"
 version = "0.1.0"
-description = "Original Flask application and managed static preview tools"
+description = "Timed preview and development checks for the Astro portfolio"
 requires-python = ">=3.13,<3.14"
-dependencies = [
-    "flask==3.0.0",
-    "gunicorn==21.2.0",
-    "jinja2>=3.1.6,<4",
-    "psycopg2-binary==2.9.10",
-    "python-dotenv==1.0.1",
-]
+dependencies = []
 
 [dependency-groups]
 dev = ["pytest>=8,<10", "ruff>=0.14,<1"]

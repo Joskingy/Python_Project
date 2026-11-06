@@ -19,7 +19,7 @@ I wanted a portfolio that could explain my engineering work and demonstrate the 
 
 The project began as a Flask and PostgreSQL application. I migrated its dependency management to uv and Python 3.13, then introduced a Python build that rendered Jinja templates and Markdown into static HTML.
 
-The portfolio now uses Astro and TypeScript, with Starlight for the engineering handbook. Project content lives in typed Markdown and MDX collections. Pagefind builds one search index for projects and handbook articles. The original Flask work and its stored data remain separate from the generated site.
+The portfolio now uses Astro and TypeScript, with Starlight for the engineering handbook. Project content lives in typed Markdown and MDX collections. Pagefind builds one search index for projects and handbook articles. I retired the Flask app and container deployment tooling while preserving the source in Git history and keeping the existing database data untouched. Python remains useful for a timed local preview, and CI runs CloudFormation linting through uv.
 
 ## A deliberate interface
 
